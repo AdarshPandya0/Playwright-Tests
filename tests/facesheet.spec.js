@@ -1,6 +1,4 @@
 import { test, expect } from "../utils/fixtures.js";
-import { PatientListPage } from "../pages/PatientListPage.js";
-import { DocumentCenterPage } from "../pages/DocumentCenterPage.js";
 
 // go to /patient -> open filters if not alredy opened -> enter "cassius" as first name -> Click Filter -> Verify Thunderfolk, Cassius is visible in the results -> Click Print Facesheet -> Click patient name -> navigate to document -> find facesheet folder -> verify that a new facesheet record is present within past 2 minutes date time in the title -> open -> verify the document viewer open  
 

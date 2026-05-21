@@ -1,5 +1,4 @@
 import {  expect, test } from '../utils/fixtures.js';
-import { PatientListPage } from "../pages/PatientListPage.js";
 
 test('Verify Error Propmt',  async({ page, patientPage }) => {
 

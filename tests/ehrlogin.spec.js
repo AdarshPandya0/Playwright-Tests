@@ -5,8 +5,10 @@ test('Verify global auth setup working', async( { page } ) => {
     await page.goto('https://webims.meditab.local/#/app/patient');
 
     await expect(page).toHaveURL(/.*patient/);
-
-    await page.locator('.mtab-icon.mt-icon.mt-icon-print').first().click();
+    
+    await page.getByRole('textbox', { name: ' Search Patient - lname' }).click();
+   // await page.locator('.ui-splitbutton-menubutton.ng-tns-c128-14').click();
+   // await page.locator('.mtab-icon.mt-icon.mt-icon-print').first().click();
 
     await page.waitForTimeout(3000);    
 });

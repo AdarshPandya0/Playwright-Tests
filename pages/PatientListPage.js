@@ -28,6 +28,13 @@ async openFiltersIfNeeded() {
     }
 }
 
+
+async openFindaSlotFirstRecord() {
+        await this.page.locator('.mtab-icon.mt-icon.mt-reg-icon').first().click();
+        await expect(this.page.locator('div').filter({ hasText: 'Find a slot ui-btn' }).nth(1)).toBeVisible();    
+
+}
+
 async searchForPatient(firstName) {
     await this.openFiltersIfNeeded();
 

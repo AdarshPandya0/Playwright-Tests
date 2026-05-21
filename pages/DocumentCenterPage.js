@@ -6,7 +6,7 @@ export class DocumentCenterPage {
         this.page = page;
 
         this.sidebarDocsLink = page.getByRole('link', {name : 'Documents'}); // Patient Chart sidebar link
-        this.folderSearchInput = page.getByRole('textbox', {name : ' Search Folder'}); // Patient Char Document folder search
+        this.folderSearchInput = page.getByRole('textbox', {name : /Search Folder/}); // Patient Char Document folder search
         this.faceSheetFolder = page.getByRole('cell', { name: /Patient Face Sheet/ }); // Searching for Print Face Sheet folder in the document explorer
         this.fileIcons = page.locator('.mtab-document-explorer-list-icon'); // File Icon within the folder
         this.viewerTitleBase = page.locator('.mtab-file-view-header'); // Document title in the viewer

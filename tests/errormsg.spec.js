@@ -1,10 +1,9 @@
-import {  expect, test } from '@playwright/test';
+import {  expect, test } from '../utils/fixtures.js';
 import { PatientListPage } from "../pages/PatientListPage.js";
 
-test('Verify Error Propmt',  async({ page }) => {
-    const patientListPage = new PatientListPage(page);
+test('Verify Error Propmt',  async({ page, patientPage }) => {
 
-    await patientListPage.goto();
+    await patientPage.goto();
 
     await page.route('https://webims.meditab.local/api/patient/fetch?page=1&size=20', async (route) => {
 
@@ -27,11 +26,9 @@ test('Verify Error Propmt',  async({ page }) => {
         });
     })
 
-    await patientListPage.searchForPatient('cassius');
+    await patientPage.searchForPatient('cassius');
 
     const errorMessage = page.getByText('An error occurred. Please contact support.');
-
-
 
     await expect(errorMessage).toBeVisible();
 

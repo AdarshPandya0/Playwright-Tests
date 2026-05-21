@@ -1,17 +1,5 @@
 import { test, expect } from "@playwright/test";
 
-
-// const loginViaOAuth = async({ page }, token)  => {
-// 	await page.context().addCookies([{
-// 		name: 'access_token',
-// 		value: token,
-// 		domain : 'meditab.local',
-// 		path:'/'
-// 	}]);
-	
-// 	await page.goto('https://webims.meditab.local/#/app/dashboard');
-// }
-
 test('Verify global auth setup working', async( { page } ) => {
 
     await page.goto('https://webims.meditab.local/#/app/patient');

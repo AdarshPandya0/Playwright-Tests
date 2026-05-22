@@ -2,6 +2,7 @@ import { test as base } from "@playwright/test";
 import { PatientListPage } from "../pages/PatientListPage";
 import { DocumentCenterPage } from "../pages/DocumentCenterPage";
 import { TopBar } from "../pages/TopBar";
+import { SchedulerPage } from "../pages/Scheduler";
 
 export const test = base.extend({ 
 
@@ -18,6 +19,11 @@ export const test = base.extend({
     topBar : async({ page }, use) => {
         const topBar = new TopBar(page);
         await use(topBar);
+    },
+
+    scheduler : async({ page }, use) => {
+        const scheduler = new SchedulerPage(page);
+        await use(scheduler);
     }
 });
 

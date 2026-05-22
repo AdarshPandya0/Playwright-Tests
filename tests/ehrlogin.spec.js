@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../utils/fixtures.js";
 
 test('Verify global auth setup working', async( { page } ) => {
 
@@ -27,3 +27,13 @@ test('Find Locator', async( { page } ) => {
 
     await page.waitForTimeout(3000);
 })
+
+test('Page Navigator to find locators', async({ page, scheduler}) => {
+
+    await scheduler.goto();
+
+    await scheduler.closeNotesModalIfOpen();
+
+    await page.waitForTimeout(3000);
+
+});

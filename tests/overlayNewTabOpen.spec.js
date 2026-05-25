@@ -1,4 +1,4 @@
-import { test, expect } from "../utils/fixtures.js";    
+import { test, expect } from "../utils/fixtures.js";
 
 test('Verify New Tab Open while on an Overlay', async( { page, patientPage, topBar } ) => {
 
@@ -18,7 +18,7 @@ test('Verify New Tab Open while on an Overlay', async( { page, patientPage, topB
 
     await newTab.waitForLoadState('networkidle');
 
-    await expect(newTab).toHaveURL("https://webims.meditab.local/#/app/patient/create");
+    await expect(newTab).toHaveURL('/#/app/patient/create');
 
     await newTab.close();
 

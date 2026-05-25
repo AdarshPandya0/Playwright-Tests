@@ -4,7 +4,7 @@ test('Verify Error Propmt',  async({ page, patientPage }) => {
 
     await patientPage.goto();
 
-    await page.route('https://webims.meditab.local/api/patient/fetch?page=1&size=20', async (route) => {
+    await page.route('**/api/patient/fetch*', async (route) => {
 
         await route.fulfill({
             status : 200,
@@ -25,7 +25,7 @@ test('Verify Error Propmt',  async({ page, patientPage }) => {
         });
     })
 
-    await patientPage.searchForPatient('cassius');
+    await patientPage.clickOrderByPatientColumn();
 
     const errorMessage = page.getByText('An error occurred. Please contact support.');
 

@@ -10,7 +10,7 @@ export class SchedulerPage {
     }
 
     async goto() {
-        await this.page.goto("https://webims.meditab.local/#/app/scheduler");
+        await this.page.goto('/#/app/scheduler');
         await this.page.waitForLoadState('networkidle');
     }
 

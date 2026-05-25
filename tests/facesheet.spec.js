@@ -10,10 +10,10 @@ test('Verify Print Facesheet functionality', async( { page, patientPage, docCent
 
     await patientPage.searchForPatient("cassius");
 
-    const patientRecord = page.getByText('Thunderfolk, Cassius (173)');
+    const patientRecord = page.getByText('Thunderfolk, Cassius (173)').first();
     await expect(patientRecord).toBeVisible();
 
-    await patientPage.printfacesheetBtn.click();
+    await patientPage.printfacesheetBtn.first().click();
 
     await expect(patientPage.savefacesheetBtn).toBeVisible();
 

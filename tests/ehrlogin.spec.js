@@ -2,7 +2,7 @@ import { test, expect } from "../utils/fixtures.js";
 
 test('Verify global auth setup working', async( { page } ) => {
 
-    await page.goto('https://webims.meditab.local/#/app/patient');
+    await page.goto('/#/app/patient');
 
     await expect(page).toHaveURL(/.*patient/);
     
@@ -15,7 +15,7 @@ test('Verify global auth setup working', async( { page } ) => {
 
 test('Find Locator', async( { page } ) => {
 
-    await page.goto('https://webims.meditab.local/#/app/patient/edit/10005982342/documents')
+    await page.goto('/#/app/patient/edit/10005982342/documents')
 
     await page.waitForTimeout(1000);
 

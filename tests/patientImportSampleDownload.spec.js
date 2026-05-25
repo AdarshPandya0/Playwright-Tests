@@ -4,7 +4,7 @@ test('Verify Patient Import Sample Download', async({ page, patientPage }) => {
 
     await patientPage.goto();
 
-    await page.locator('.ui-splitbutton-menubutton.ng-tns-c128-14').click();
+    await page.locator('.ui-splitbutton-menubutton.ng-tns-c128-15').click();
 
     const downloadPromise = page.waitForEvent('download');
 

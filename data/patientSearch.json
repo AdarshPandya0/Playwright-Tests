@@ -1,0 +1,20 @@
+[
+    {
+        "testId": "TC001",
+        "searchName": "cassius",
+        "expectedResult": "Cassius",
+        "shouldFind": true
+    },
+    {
+        "testId": "TC002",
+        "searchName": "zachary",
+        "expectedResult": "Zachary",
+        "shouldFind": true
+    },
+    {
+        "testId": "TC003",
+        "searchName": "invalidName123",
+        "expectedResult": "No Patient Found",
+        "shouldFind": false
+    }
+]

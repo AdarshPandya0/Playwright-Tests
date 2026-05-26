@@ -1,26 +1,47 @@
-name: Playwright Tests
+name: Playwright Production Tests
+
+# 1. Trigger the tests when code is pushed to main, or a PR is opened against main
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
         node-version: lts/*
+
     - name: Install dependencies
       run: npm ci
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
+
+    # 2. RUN TESTS WITH SECRETS INJECTED
+    - name: Run Playwright Tests
+      run: npm run test:ci
+      env:
+        # This maps the secure GitHub secrets to the OS environment variables!
+        ENV: prod
+        URL: ${{ secrets.URL }}
+        EHR_USERNAME: ${{ secrets.EHR_USERNAME }}
+        EHR_PASSWORD: ${{ secrets.EHR_PASSWORD }}
+        EHR_CLINIC: ${{ secrets.EHR_CLINIC }}
+
+    # 3. UPLOAD THE HTML REPORT
+    - name: Upload Playwright Report
+      uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }} # Ensures the report uploads even if a test fails!
       with:
         name: playwright-report
         path: playwright-report/

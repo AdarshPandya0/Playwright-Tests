@@ -1,6 +1,6 @@
 import {  expect, test } from '../utils/fixtures.js';
 
-test('Verify Error Propmt',  async({ page, patientPage }) => {
+test('Verify Error Propmt @patient @regression ',  async({ page, patientPage }) => {
 
     await patientPage.goto();
 

@@ -1,6 +1,6 @@
 import { test, expect } from "../utils/fixtures.js";
 
-test('Verify New Tab Open while on an Overlay', async( { page, patientPage, topBar } ) => {
+test('Verify New Tab Open while on an Overlay @smoke ', async( { page, patientPage, topBar } ) => {
 
     await patientPage.goto();
 

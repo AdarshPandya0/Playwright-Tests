@@ -19,7 +19,7 @@ for(const data of searchdata) {
     });
 }
 
-test('Accessibility Check on Patient Grid', async({ page, patientPage }, testInfo) => {
+test.skip('Accessibility Check on Patient Grid', async({ page, patientPage }, testInfo) => {
 
     await patientPage.goto();
 

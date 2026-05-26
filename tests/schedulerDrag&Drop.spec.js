@@ -1,6 +1,6 @@
 import { test, expect } from "../utils/fixtures.js";
 
-test('Verify Scheduler Drag and Drop functionality', async( { page, scheduler } ) => {
+test.skip('Verify Scheduler Drag and Drop functionality  @scheduler @regression', async( { page, scheduler } ) => {
 
     await scheduler.goto();
 

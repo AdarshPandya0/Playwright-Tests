@@ -11,6 +11,11 @@
   "scripts": {
     "test": "npx playwright test",
     "test:ui:local": "cross-env ENV=local npx playwright test --ui",
-    "test:ui:prod": "cross-env ENV=prod npx playwright test --ui"
+    "test:ui:prod": "cross-env ENV=prod npx playwright test --ui",
+    "test:prod:targeted": "cross-env ENV=prod npx playwright test --grep @targeted",
+    "test:ui:local:smoke": "cross-env ENV=local npx playwright test --ui --grep @smoke",
+    "test:local:smoke": "cross-env ENV=local npx playwright test --grep @smoke",
+
+    "test:ci": "cross-env ENV=prod npx playwright test"
   }
 }

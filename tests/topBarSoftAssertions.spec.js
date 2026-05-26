@@ -1,6 +1,6 @@
 import { test , expect } from "../utils/fixtures.js";
 
-test('Verify Top Bar Elements with Soft Assertions', async({ page, topBar }) => {
+test('Verify Top Bar Elements with Soft Assertions @topbar @smoke @targeted ', async({ page, topBar }) => {
 
     await topBar.goto();  
 

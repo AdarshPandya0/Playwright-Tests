@@ -26,7 +26,10 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-        trace: 'on-first-retry',
+        trace: 'retain-on-failure',
+        video: 'retain-on-failure',
+        screenshot: 'only-on-failure',
+
         baseURL: process.env.URL,
         viewport: { width: 1920, height: 1080 },
   },

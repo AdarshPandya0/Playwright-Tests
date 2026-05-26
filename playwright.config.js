@@ -28,6 +28,7 @@ export default defineConfig({
   use: {
         trace: 'on-first-retry',
         baseURL: process.env.URL,
+        viewport: { width: 1920, height: 1080 },
   },
 
   /* Configure projects for major browsers */

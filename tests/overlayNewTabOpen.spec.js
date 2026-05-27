@@ -6,11 +6,17 @@ test('Verify New Tab Open while on an Overlay @smoke ', async( { page, patientPa
 
     await patientPage.openFindaSlotFirstRecord();
 
+    await page.waitForLoadState('networkidle');
+
     const newTabPromise = page.context().waitForEvent('page');
 
-    await topBar.searchBar.click();
+    await expect( async () => {
+        await topBar.searchBar.click();
 
-    await expect(topBar.searchBarAddBtn).toBeVisible();
+        await expect(topBar.searchBarAddBtn).toBeVisible({
+            timeout: 500,
+        });
+    }).toPass();
 
     await topBar.searchBarAddBtn.click();
 

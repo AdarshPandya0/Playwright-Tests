@@ -19,9 +19,13 @@ export class PatientListPage {
     }
 
     async goto() {
-        await this.page.goto('/#/app/patient');
-        await this.page.waitForLoadState('networkidle');+
-        await expect(this.ptIconBtn.first()).toBeVisible();
+        await expect( async () => {
+            await this.page.goto('/#/app/patient');
+            await this.page.waitForLoadState('networkidle');
+            await expect(this.ptIconBtn.first()).toBeVisible({
+                timeout: 500, 
+            });
+        }).toPass();
     }
 
     async openFiltersIfNeeded() {

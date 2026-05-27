@@ -6,6 +6,9 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  
+#  schedule:
+#    - cron: '30 18 * * 1-5' # Every weekday at 18:30 UTC (12: 00 AM IST)
 
 permissions:
   contents: read 
@@ -34,7 +37,7 @@ jobs:
 
     # 2. RUN TESTS WITH SECRETS INJECTED
     - name: Run Playwright Tests
-      run: npm run test:chrm:ci
+      run: npm run test:prod:sharded
       env:
         # This maps the secure GitHub secrets to the OS environment variables!
         ENV: prod

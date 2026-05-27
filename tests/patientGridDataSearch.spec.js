@@ -5,14 +5,18 @@ import AxeBuilder from '@axe-core/playwright';
 for(const data of searchdata) {
     test(`[${data.testId}] Verify Patient Search for: ${data.searchName}`, async({ page, patientPage }) => {
         await patientPage.goto();
-
-        await patientPage.searchForPatient(data.searchName);
+         
+        await expect( async () => {
+            await patientPage.searchForPatient(data.searchName);
+        }).toPass();    
 
         await page.waitForLoadState('networkidle');
 
         if (data.shouldFind) {
             const patientGrid = page.locator('.mtab-primary-panel');
-            await expect(patientGrid).toContainText(data.expectedResult);
+            await expect ( async () => {
+                await expect(patientGrid).toContainText(data.expectedResult);
+            }).toPass();
         }
         else {
             const noRecordsMsg = page.getByText("No Patient Found. click 'Add Patient' button to register new Patient.");

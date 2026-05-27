@@ -6,16 +6,28 @@ import { SchedulerPage } from "../pages/Scheduler";
 
 export const test = base.extend({ 
 
-    page: async({ page }, use) => {
+    page: async({ page }, use, testInfo) => {
+
+        const currentShard = testInfo.config.shard?.current || 1;
+
+        const dynamicUsername = process.env[`EHR_USERNAME_${currentShard}`];
+        const dynamicPassword = process.env[`EHR_PASSWORD_${currentShard}`];
+
         await page.goto('/#/login');
         await page.locator('#clinic input').fill(process.env.EHR_CLINIC);
-        await page.locator('#username input').fill(process.env.EHR_USERNAME);
-        await page.locator('#password input').fill(process.env.EHR_PASSWORD);
+
+        await page.locator('#username input').fill(dynamicUsername);
+        await page.locator('#password input').fill(dynamicPassword);
+
         await page.locator('p-checkbox').click();
         await page.getByRole('button', { name: 'Login' }).click();
         await page.waitForLoadState('networkidle');
-        await expect(page.getByRole('link', {name : "Dashboard"})).toBeVisible();
-        
+        await expect( async () => {
+            await expect(page.getByRole('link', {name : "Dashboard"})).toBeVisible({
+                timeout: 500,
+            });
+        }).toPass();
+
         await use(page);
 
     },

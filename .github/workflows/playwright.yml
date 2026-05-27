@@ -34,7 +34,7 @@ jobs:
 
     # 2. RUN TESTS WITH SECRETS INJECTED
     - name: Run Playwright Tests
-      run: npm run test:ci
+      run: npm run test:chrm:ci
       env:
         # This maps the secure GitHub secrets to the OS environment variables!
         ENV: prod

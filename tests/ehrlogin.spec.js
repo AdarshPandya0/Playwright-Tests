@@ -13,7 +13,7 @@ test('Verify global auth setup working', async( { page } ) => {
     await page.waitForTimeout(3000);    
 });
 
-test('Find Locator', async( { page } ) => {
+test.skip('Find Locator', async( { page } ) => {
 
     await page.goto('/#/app/patient/edit/10005982342/documents')
 

@@ -8,6 +8,8 @@ for(const data of searchdata) {
 
         await patientPage.searchForPatient(data.searchName);
 
+        await page.waitForLoadState('networkidle');
+
         if (data.shouldFind) {
             const patientGrid = page.locator('.mtab-primary-panel');
             await expect(patientGrid).toContainText(data.expectedResult);

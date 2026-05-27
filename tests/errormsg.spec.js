@@ -4,7 +4,7 @@ test('Verify Error Propmt @patient @regression ',  async({ page, patientPage }) 
 
     await patientPage.goto();
 
-    await page.route('**/api/patient/fetch*', async (route) => {
+    await page.route('**/api/patient/fetch?page=1&size=20&orderBy=name&search=&title=&isSorted=true', async (route) => {
 
         await route.fulfill({
             status : 200,
@@ -25,7 +25,7 @@ test('Verify Error Propmt @patient @regression ',  async({ page, patientPage }) 
         });
     })
 
-    await patientPage.clickOrderByPatientColumn();
+    await patientPage.orderByPatientColumnBtn.click();
 
     const errorMessage = page.getByText('An error occurred. Please contact support.');
 

@@ -13,8 +13,9 @@ export const test = base.extend({
         await page.locator('#password input').fill(process.env.EHR_PASSWORD);
         await page.locator('p-checkbox').click();
         await page.getByRole('button', { name: 'Login' }).click();
-
+        await page.waitForLoadState('networkidle');
         await expect(page.getByRole('link', {name : "Dashboard"})).toBeVisible();
+        
         await use(page);
 
     },

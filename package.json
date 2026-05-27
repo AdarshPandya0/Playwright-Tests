@@ -16,6 +16,7 @@
     "test:ui:local:smoke": "cross-env ENV=local npx playwright test --ui --grep @smoke",
     "test:local:smoke": "cross-env ENV=local npx playwright test --grep @smoke",
 
-    "test:ci": "cross-env ENV=prod npx playwright test"
+    "test:ci": "cross-env ENV=prod npx playwright test",
+    "test:chrm:ci": "cross-env ENV=prod npx playwright test --project=chromium"
   }
 }

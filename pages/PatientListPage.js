@@ -13,12 +13,15 @@ export class PatientListPage {
         this.printfacesheetBtn = page.locator('.mtab-icon.mt-icon.mt-icon-print');
 
         this.savefacesheetBtn = page.getByRole('button', {name : 'Save Facesheet'});
-        this.orderByPatientColumnBtn = page.getByRole('link').filter({ hasText: /^$/ }).nth(2);
+        this.orderByPatientColumnBtn = page.getByRole('link').filter({ hasText: /^$/ }).nth(0);
+        this.ptInfoIconBtn = page.locator('.mt-icon.mt-icon-info').first();
+        this.ptIconBtn = page.locator('.mtab-icon.mt-icon.mt-icon-user');
     }
 
     async goto() {
         await this.page.goto('/#/app/patient');
-        await this.page.waitForLoadState('networkidle');
+        await this.page.waitForLoadState('networkidle');+
+        await expect(this.ptIconBtn.first()).toBeVisible();
     }
 
     async openFiltersIfNeeded() {

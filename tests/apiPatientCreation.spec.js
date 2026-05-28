@@ -20,85 +20,23 @@ test('Create Patient via API and verify in UI', async ({ page, patientPage }) =>
     expect(xTokenCookie, 'CRITICAL: Could not find live x-token in browser cookies!').toBeDefined();
     
     const liveAuthToken = xTokenCookie.value;
-    const patientPayload = {
-        "id": null, "isActive": true, "chartNumber": null, "facilityId": null, "providerId": null, "prefix": null,
-        "firstName": uniqueFirstName,
-        "lastName": "Jones",
-        "lastName2": null, "middleName": null, "suffix": null,
-        "uID": uniqueUID,
-        "dOB": 315532800000, "isMultipleBirth": false, "multipleBirthOrder": null, "sexId": 10005814,
-        "genderIdentityId": null, "sexualOrientationId": null, "maritalStatusId": null, "aka": null,
-        "preferredLanguageId": null, "isInterpreter": false, "driverLicense": null, "primaryPharmacyId": null,
-        "isUseCurrentPharmacyForAllRx": false, "referralSourceId": null, "deceasedDate": null, "deceasedTime": null,
-        "note": null, "photoId": null, "isSelfPay": true, "isGenerateFinanceCharge": true, "isVerified": false,
-        "firstCalledDate": null, "isInsured": false, "lastModifiedDate": null,
-        "contactDetail": {
-            "created": [
-                {
-                    "id": null, "createdById": null, "createdDate": null, "isPrimary": true, "lastModifiedById": null,
-                    "lastModifiedDate": null, "resourceId": null, "resourceType": null,
-                    "addressType": {
-                        "text": "Home", "clientId": 10005, "id": 1000516, "code": "Home", "count": 0, "isSelectable": true
-                    },
-                    "addressTypeId": 1000516, "prefComm": null,
-                    "contactAddress": {
-                        "city": "GAINESVILLE", "countryCode": "US", "countryId": 1000550, "state": "FLORIDA",
-                        "stateCode": "FL", "street": "Grove Street, GAINSEVILLE", "zipCode": "326010002",
-                        "country": {
-                            "text": "(US) United States", "clientId": 10005, "id": 1000550, "code": "US",
-                            "name": "United States", "isActive": true, "numericCode": "1", "countryWithCode": "+1 United States"
-                        },
-                        "contactAddressFEId": 3
-                    },
-                    "contactFax": [],
-                    "contactPhone": [
-                        {
-                            "isPrimary": false, "phone": "9165181131",
-                            "phoneType": { "text": "Cell", "clientId": 10005, "id": 100051166, "code": "Cell", "isSelectable": true },
-                            "phoneTypeId": 100051166, "prefix": "1", "feId": 1, "contactPhoneFEId": 1, "countryId": 1000550
-                        }
-                    ],
-                    "contactEmail": [
-                        { "email": `adarshp+${uniqueStamp}@meditab.com`, "isPrimary": false, "feId": 2, "contactEmailFEId": 2 }
-                    ],
-                    "contactWebsite": []
-                }
-            ],
-            "updated": [], "deleted": []
-        },
-        "race": null, "ethnicity": [], "sOFDate": null, "isCreateCase": false, "birthPlace": null, "isDeceased": false,
-        "mothersIdentifier": null, "mothersMaidenFirstName": null, "mothersMaidenLastName": null, "mothersMaidenMiddleName": null,
-        "religionId": null, "veteransMilitaryStatusId": null, "citizenshipId": null, "nationality": null, "isPCPSameAsProvider": false,
-        "pCPId": null, "pCPTypeId": null, "employmentId": null, "primaryLabId": null, "patientPharmacyList": null, "patientDLList": null,
-        "primaryPharmacy": null, "timeZoneId": null, "appointmentId": null,
-        "contactDetailPreference": [],
-        "primaryLabName": null, "primaryLabCode": null,
-        "patientRisk": { "created": [], "updated": [], "deleted": [] },
-        "tags": null, "customStatusId": null,
-        "patientLabPreferenceMap": { "created": [], "updated": [], "deleted": [] },
-        "initialPatientLabPreferenceMap": null, "sourceId": null, "sourceTypeId": null, "extGuid": null, "extId": null,
-        "extUpdateDate": null, "lastPatientStatementId": null, "feeScheduleDetailId": null, "extRefId": null, "isProspect": false,
-        "extMessageGuid": null, "currentResidenceId": null, "relationId": null, "evacuationStatusId": null, "codeStatusId": null,
-        "advanceDirectiveId": null, "diet": [], "isPatientStatementConsent": true, "isSOF": true, "copyDetail": null,
-        "serviceLocationId": null, "serviceLocationTypeId": null, "mrnNo": null, "hmisNo": null
-    };
+    const patientPayload = {"id":null,"isActive":true,"chartNumber":null,"facilityId":1000614,"providerId":null,"prefix":null,"firstName": uniqueFirstName,"lastName":"Jones","lastName2":null,"middleName":null,"suffix":null,"uID":uniqueUID,"dOB":315532800000,"isMultipleBirth":false,"multipleBirthOrder":null,"sexId":10006814,"genderIdentityId":null,"sexualOrientationId":null,"maritalStatusId":null,"aka":null,"preferredLanguageId":null,"isInterpreter":false,"driverLicense":null,"primaryPharmacyId":null,"isUseCurrentPharmacyForAllRx":false,"referralSourceId":null,"deceasedDate":null,"deceasedTime":null,"note":null,"photoId":null,"isSelfPay":true,"isGenerateFinanceCharge":true,"isVerified":false,"firstCalledDate":null,"isInsured":false,"lastModifiedDate":null,"contactDetail":{"created":[{"id":null,"createdById":null,"createdDate":null,"isPrimary":true,"lastModifiedById":null,"lastModifiedDate":null,"resourceId":null,"resourceType":null,"addressType":{"text":"Home","createdBy":null,"lastModifiedBy":null,"clientId":10006,"id":1000616,"code":"Home","name":null,"count":0,"isActive":null,"statusColor":null,"color":null,"sequence":null,"fromVendor":null,"isCustom":null,"valueTypeId":null,"min":null,"max":null,"type":"AddressType","typeId":null,"jobTitle":null,"duration":null,"isSelect":null,"toTime":null,"fromTime":null,"description":"Home","isPrimary":null,"extCode":null,"clientUserId":null,"codeTypeId":null,"codeTypeCode":null,"lastModifiedDate":1631959098638,"isSelectable":true},"addressTypeId":1000616,"prefComm":null,"contactAddress":{"id":null,"feId":null,"text":null,"city":"GAINESVILLE","contactDetailId":null,"countryCode":"US","countryId":1000650,"createdById":null,"createdDate":null,"lastModifiedById":null,"lastModifiedDate":null,"stateObj":null,"state":"FLORIDA","stateCode":"FL","street":"Grove Street, GAINSEVILLE","street2":null,"zipCode":"326010000","createdBy":null,"lastModifiedBy":null,"country":{"text":"(US) United States","createdBy":null,"lastModifiedBy":null,"clientId":10006,"id":1000650,"code":"US","name":"United States","count":null,"isActive":true,"statusColor":null,"color":null,"sequence":null,"fromVendor":null,"isCustom":null,"valueTypeId":null,"min":null,"max":null,"type":null,"typeId":null,"jobTitle":null,"duration":null,"isSelect":null,"toTime":null,"fromTime":null,"description":null,"isPrimary":null,"extCode":null,"clientUserId":null,"codeTypeId":null,"codeTypeCode":null,"numericCode":"1","countryWithCode":"+1 United States"},"contactAddressFEId":3},"contactFax":[],"contactPhone":[],"contactEmail":[],"contactWebsite":[]},{"id":null,"createdById":null,"createdDate":null,"isPrimary":false,"lastModifiedById":null,"lastModifiedDate":null,"resourceId":null,"resourceType":null,"addressType":{"text":"Work","createdBy":null,"lastModifiedBy":null,"clientId":10006,"id":1000623,"code":"Work","name":null,"count":0,"isActive":null,"statusColor":null,"color":null,"sequence":null,"fromVendor":null,"isCustom":null,"valueTypeId":null,"min":null,"max":null,"type":"AddressType","typeId":null,"jobTitle":null,"duration":null,"isSelect":null,"toTime":null,"fromTime":null,"description":"Work","isPrimary":null,"extCode":null,"clientUserId":null,"codeTypeId":null,"codeTypeCode":null,"lastModifiedDate":1631959098638,"isSelectable":true},"addressTypeId":1000623,"prefComm":null,"contactAddress":{"id":null,"feId":null,"text":null,"city":null,"contactDetailId":null,"countryCode":"US","countryId":1000650,"createdById":null,"createdDate":null,"lastModifiedById":null,"lastModifiedDate":null,"stateObj":null,"state":null,"stateCode":null,"street":null,"street2":null,"zipCode":null,"createdBy":null,"lastModifiedBy":null,"country":{"text":"+1 United States","createdBy":null,"lastModifiedBy":null,"clientId":10006,"id":1000650,"code":"US","name":"United States","count":null,"isActive":true,"statusColor":null,"color":null,"sequence":null,"fromVendor":null,"isCustom":null,"valueTypeId":null,"min":null,"max":null,"type":null,"typeId":null,"jobTitle":null,"duration":null,"isSelect":null,"toTime":null,"fromTime":null,"description":null,"isPrimary":null,"extCode":null,"clientUserId":null,"codeTypeId":null,"codeTypeCode":null,"numericCode":"1","countryWithCode":"+1 United States"},"contactAddressFEId":4},"contactFax":[],"contactPhone":[],"contactEmail":[],"contactWebsite":[]}],"updated":[],"deleted":[]},"race":null,"ethnicity":[],"sOFDate":null,"isCreateCase":false,"birthPlace":null,"isDeceased":false,"mothersIdentifier":null,"mothersMaidenFirstName":null,"mothersMaidenLastName":null,"mothersMaidenMiddleName":null,"religionId":null,"veteransMilitaryStatusId":null,"citizenshipId":null,"nationality":null,"isPCPSameAsProvider":false,"pCPId":null,"pCPTypeId":null,"employmentId":null,"primaryLabId":null,"patientPharmacyList":null,"patientDLList":null,"primaryPharmacy":null,"timeZoneId":10006268,"appointmentId":null,"contactDetailPreference":[{"id":null,"resourceId":null,"resourceTypeId":null,"prefCommTypeId":null,"prefCommValueId":null,"prefCommValueFEId":null,"preferenceTypeId":10006443,"contactAddressId":null,"contactPhoneId":null,"contactFaxId":null,"contactEmailId":null,"lastModifiedDate":null,"contactAddressFEId":3,"contactPhoneFEId":null,"contactFaxFEId":null,"contactEmailFEId":null,"contactWebsiteId":null,"contactWebsiteFEId":null},{"id":null,"resourceId":null,"resourceTypeId":null,"prefCommTypeId":null,"prefCommValueId":null,"prefCommValueFEId":null,"preferenceTypeId":10006448,"contactAddressId":null,"contactPhoneId":null,"contactFaxId":null,"contactEmailId":null,"lastModifiedDate":null,"contactAddressFEId":3,"contactPhoneFEId":null,"contactFaxFEId":null,"contactEmailFEId":null,"contactWebsiteId":null,"contactWebsiteFEId":null},{"id":null,"resourceId":null,"resourceTypeId":null,"prefCommTypeId":null,"prefCommValueId":null,"prefCommValueFEId":null,"preferenceTypeId":10006450,"contactAddressId":null,"contactPhoneId":null,"contactFaxId":null,"contactEmailId":null,"lastModifiedDate":null,"contactAddressFEId":3,"contactPhoneFEId":null,"contactFaxFEId":null,"contactEmailFEId":null,"contactWebsiteId":null,"contactWebsiteFEId":null},{"id":null,"resourceId":null,"resourceTypeId":null,"prefCommTypeId":null,"prefCommValueId":null,"prefCommValueFEId":null,"preferenceTypeId":10006454,"contactAddressId":null,"contactPhoneId":null,"contactFaxId":null,"contactEmailId":null,"lastModifiedDate":null,"contactAddressFEId":3,"contactPhoneFEId":null,"contactFaxFEId":null,"contactEmailFEId":null,"contactWebsiteId":null,"contactWebsiteFEId":null},{"id":null,"resourceId":null,"resourceTypeId":null,"prefCommTypeId":null,"prefCommValueId":null,"prefCommValueFEId":null,"preferenceTypeId":10006449,"contactAddressId":null,"contactPhoneId":null,"contactFaxId":null,"contactEmailId":null,"lastModifiedDate":null,"contactAddressFEId":null,"contactPhoneFEId":null,"contactFaxFEId":null,"contactEmailFEId":null,"contactWebsiteId":null,"contactWebsiteFEId":null}],"primaryLabName":null,"primaryLabCode":null,"patientRisk":{"created":[],"updated":[],"deleted":[]},"tags":null,"customStatusId":null,"patientLabPreferenceMap":{"created":[],"updated":[],"deleted":[]},"initialPatientLabPreferenceMap":null,"sourceId":null,"sourceTypeId":null,"extGuid":null,"extId":null,"extUpdateDate":null,"lastPatientStatementId":null,"feeScheduleDetailId":null,"extRefId":null,"isProspect":false,"extMessageGuid":null,"currentResidenceId":null,"relationId":null,"evacuationStatusId":null,"codeStatusId":null,"advanceDirectiveId":null,"diet":[],"isPatientStatementConsent":true,"isSOF":true,"copyDetail":null,"serviceLocationId":null,"serviceLocationTypeId":null,"mrnNo":null,"hmisNo":null};
+
 
     // ==========================================
  // PHASE 2: ACT (Fire the API Request)
-    const response = await page.request.post('https://webims.meditab.local/api/patient', {
+    const response = await page.request.post('/api/patient', {
         headers: {
             'accept': 'application/json, text/plain, */*',
             'content-type': 'application/json',
             
             // 1. Add the security origin headers
-            'origin': 'https://webims.meditab.local',
-            'referer': 'https://webims.meditab.local/',
+            'origin': process.env.URL,
+            'referer': `${process.env.URL}`,
             
             // 2. Add the custom routing header exactly as Postman has it
             'x-requestargs': 'iemoweb;0.0.1;PATIENTDEMOGRAPHICS;718ec9e7-4415-4b4d-ba54-49a66b2d09a9;/app/patient/create',
             
-            // 3. HARDCODE your token from Postman just for this test run!
-            // Paste the massive 'eyJ...' string inside these quotes
             'x-token': liveAuthToken
         },
         data: patientPayload

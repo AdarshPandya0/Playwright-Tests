@@ -33,37 +33,7 @@ test('Create Patient via API and verify in UI', async ({ page, patientPage }) =>
         "note": null, "photoId": null, "isSelfPay": true, "isGenerateFinanceCharge": true, "isVerified": false,
         "firstCalledDate": null, "isInsured": false, "lastModifiedDate": null,
         "contactDetail": {
-            "created": [
-                {
-                    "id": null, "createdById": null, "createdDate": null, "isPrimary": true, "lastModifiedById": null,
-                    "lastModifiedDate": null, "resourceId": null, "resourceType": null,
-                    "addressType": {
-                        "text": "Home", "clientId": 10005, "id": 1000516, "code": "Home", "count": 0, "isSelectable": true
-                    },
-                    "addressTypeId": 1000516, "prefComm": null,
-                    "contactAddress": {
-                        "city": "GAINESVILLE", "countryCode": "US", "countryId": 1000550, "state": "FLORIDA",
-                        "stateCode": "FL", "street": "Grove Street, GAINSEVILLE", "zipCode": "326010002",
-                        "country": {
-                            "text": "(US) United States", "clientId": 10005, "id": 1000550, "code": "US",
-                            "name": "United States", "isActive": true, "numericCode": "1", "countryWithCode": "+1 United States"
-                        },
-                        "contactAddressFEId": 3
-                    },
-                    "contactFax": [],
-                    "contactPhone": [
-                        {
-                            "isPrimary": false, "phone": "9165181131",
-                            "phoneType": { "text": "Cell", "clientId": 10005, "id": 100051166, "code": "Cell", "isSelectable": true },
-                            "phoneTypeId": 100051166, "prefix": "1", "feId": 1, "contactPhoneFEId": 1, "countryId": 1000550
-                        }
-                    ],
-                    "contactEmail": [
-                        { "email": `adarshp+${uniqueStamp}@meditab.com`, "isPrimary": false, "feId": 2, "contactEmailFEId": 2 }
-                    ],
-                    "contactWebsite": []
-                }
-            ],
+            "created": [],
             "updated": [], "deleted": []
         },
         "race": null, "ethnicity": [], "sOFDate": null, "isCreateCase": false, "birthPlace": null, "isDeceased": false,
@@ -85,20 +55,19 @@ test('Create Patient via API and verify in UI', async ({ page, patientPage }) =>
 
     // ==========================================
  // PHASE 2: ACT (Fire the API Request)
-    const response = await page.request.post('https://webims.meditab.local/api/patient', {
+    const response = await page.request.post('/api/patient', {
         headers: {
             'accept': 'application/json, text/plain, */*',
             'content-type': 'application/json',
             
             // 1. Add the security origin headers
-            'origin': 'https://webims.meditab.local',
-            'referer': 'https://webims.meditab.local/',
+            'origin': process.env.URL,
+            'referer': `${process.env.URL}`,
             
             // 2. Add the custom routing header exactly as Postman has it
             'x-requestargs': 'iemoweb;0.0.1;PATIENTDEMOGRAPHICS;718ec9e7-4415-4b4d-ba54-49a66b2d09a9;/app/patient/create',
             
-            // 3. HARDCODE your token from Postman just for this test run!
-            // Paste the massive 'eyJ...' string inside these quotes
+
             'x-token': liveAuthToken
         },
         data: patientPayload

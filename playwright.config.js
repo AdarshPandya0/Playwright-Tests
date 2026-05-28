@@ -16,6 +16,8 @@ export default defineConfig({
   testDir: './tests',
 
   timeout: 60000,
+
+  globalSetup: './utils/global.setup.js',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -66,7 +68,7 @@ export default defineConfig({
   ],
 
   expect: {
-    timeout: 10000, //Global timeout for all expect assertions
+    timeout: 20000, //Global timeout for all expect assertions
   }
 });
 

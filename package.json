@@ -11,7 +11,7 @@
   },
   "scripts": {
     "test": "npx playwright test",
-    "report:merge": "npx playwright merge-reports --reporter html ./blob-report",
+    "report:merge": "node ./utils/hoist-blobs.js && npx playwright merge-reports --reporter html ./blob-report",
     "test:ui:local": "cross-env ENV=local npx playwright test --ui",
     "test:ui:prod": "cross-env ENV=prod npx playwright test --ui",
     "test:prod:targeted": "cross-env ENV=prod npx playwright test --grep @targeted",

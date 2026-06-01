@@ -3,9 +3,9 @@ name: Playwright Production Tests
 # 1. Trigger the tests when code is pushed to main, or a PR is opened against main
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, ChrmTests ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, ChrmTests ]
   
 #  schedule:
 #    - cron: '30 18 * * 1-5' # Every weekday at 18:30 UTC (12: 00 AM IST)
@@ -54,3 +54,13 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+
+    # 4. Google Chat Alert Hook
+    - name: Send Google Chat Notification
+      if: always()
+      run: |
+        curl -X POST -H "Content-Type: application/json" \
+          -d '{
+            "text": "*EHR Playwright Automation Run*\n\n*Status:* `${{ job.status }}`\n*Branch:* `${{ github.ref_name }}`\n\n <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Click here to view the run and download the HTML Report>"
+          }' \
+          ${{ secrets.GOOGLE_CHAT_WEBHOOK }}       

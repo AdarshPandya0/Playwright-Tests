@@ -63,4 +63,4 @@ jobs:
           -d '{
             "text": "*EHR Playwright Automation Run*\n\n*Status:* `${{ job.status }}`\n*Branch:* `${{ github.ref_name }}`\n\n <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Click here to view the run and download the HTML Report>"
           }' \
-          ${{ secrets.GOOGLE_CHAT_WEBHOOK }}       
+          "${{ secrets.GOOGLE_CHAT_WEBHOOK }}"

@@ -61,6 +61,6 @@ jobs:
       run: |
         curl -X POST -H "Content-Type: application/json" \
           -d '{
-            "text": "*EHR Playwright Automation Run*\n\n*Status:* `${{ job.status }}`\n*Branch:* `${{ github.ref_name }}`\n\n <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Click here to view the run and download the HTML Report>"
+            "text": "*EHR Playwright Automation Run*\n\n*Status:* `${{ job.status }}`\n*Branch:* `${{ github.ref_name }}`\n*URL:* `${{ secrets.URL }}`\n*Clinic:* `${{ secrets.EHR_CLINIC }}` \n\n <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Click here to view the run and download the HTML Report>"
           }' \
           "${{ secrets.GOOGLE_CHAT_WEBHOOK }}"

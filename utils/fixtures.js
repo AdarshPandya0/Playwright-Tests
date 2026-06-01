@@ -58,7 +58,7 @@ export const test = base.extend({
             } catch (error) {
                 fs.unlinkSync(statePath);
                 fs.unlinkSync(sessionPath);
-                throw new Error(`CRITICAL: The router killed our session! I have deleted the poisoned files. Please re-run.`);
+                throw new Error(`CRITICAL: The router killed the session;  deleted the poisoned files. Please re-run.`);
             }
             
             await use(page);

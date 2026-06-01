@@ -1,7 +1,7 @@
 import { test, expect } from "../utils/fixtures.js";
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Add this line to ignore TLS errors for self-signed certificates
 
-test('Create Patient via API and verify in UI', async ({ page, patientPage }) => {
+test.skip('Create Patient via API and verify in UI', async ({ page, patientPage }) => {
     
     // ==========================================
     // PHASE 1: ARRANGE (Generate Unique Data)

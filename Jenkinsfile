@@ -37,11 +37,11 @@ pipeline {
             // Send our crisp Google Chat notification using the exact same webhook URL!
             // Note: Jenkins requires the "Google Chat Notification" plugin or a curl snippet.
             // If your Jenkins has the curl command line utility available, we can use:
-            withCredentials([string(credentialsId: 'GOOGLE_CHAT_WEBHOOK', variable: 'WEBHOOK_URL')]) {
+            withCredentials([string(credentialsId: 'GOOGLE_CHAT_WEBHOOK', variable: 'https://chat.googleapis.com/v1/spaces/AAQASiSlmb8/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=LbKsz3gwsKpAqUO1ci1Yaf2JVCBGTLS7O4hvsBOPEXE')]) {
                 sh """
                 curl -X POST -H "Content-Type: application/json" \
-                -d '{"text": "*Jenkins Playwright Test Completed*\\n*Status:* ${currentBuild.currentResult}\\n👉 <${env.BUILD_URL}|Click here to view Jenkins Build>"}' \
-                "\$WEBHOOK_URL"
+                -d '{"text": "*Jenkins Playwright Test Completed*\\n*Status:* ${currentBuild.currentResult}\\n👉 <${env.URL}|Click here to view Jenkins Build>"}' \
+                "\$https://chat.googleapis.com/v1/spaces/AAQASiSlmb8/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=LbKsz3gwsKpAqUO1ci1Yaf2JVCBGTLS7O4hvsBOPEXE"
                 """
             }
         }

@@ -11,7 +11,7 @@ if (fs.existsSync(blobDir)) {
         if (fs.statSync(itemPath).isDirectory()) {
             fs.readdirSync(itemPath).forEach(file => {
                 if (file.endsWith('.zip')) {
-                    // Move the zip file up to the root blob-report folder and rename it safely
+                    // Move the zip file up to the root blob-report folder and rename it safely.
                     fs.renameSync(path.join(itemPath, file), path.join(blobDir, `shard-${counter++}.zip`));
                 }
             });

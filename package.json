@@ -25,8 +25,8 @@
     "test:local:shard:2": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-2 npx playwright test --shard=2/4 --project=chromium --reporter=blob",
     "test:local:shard:3": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-3 npx playwright test --shard=3/4 --project=chromium --reporter=blob",
     "test:local:shard:4": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-4 npx playwright test --shard=4/4 --project=chromium --reporter=blob",
-    "test:prod:sharded": "npm-run-all --parallel test:prod:shard:1 test:prod:shard:2 test:prod:shard:3 test:prod:shard:4",
-    "test:local:sharded": "npm-run-all --parallel test:local:shard:1 test:local:shard:2 test:local:shard:3 test:local:shard:4",
+    "test:prod:sharded": "node utils/cleanup.js && npm-run-all --parallel test:prod:shard:1 test:prod:shard:2 test:prod:shard:3 test:prod:shard:4",
+    "test:local:sharded": "node utils/cleanup.js && npm-run-all --parallel test:local:shard:1 test:local:shard:2 test:local:shard:3 test:local:shard:4",
     "test:ci": "cross-env ENV=prod npx playwright test",
     "test:chrm:ci": "cross-env ENV=prod npx playwright test --project=chromium"
 

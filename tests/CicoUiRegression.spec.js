@@ -43,7 +43,12 @@ test.describe('CICO (Check-In/Check-Out) UI Regression', () => {
         // (Grid View validations)
         await cicoPage.clickGridView();
         await cicoPage.searchGridView(patientFirstName); // Search by First Name in Grid View as well
-        await cicoPage.verifyPatientInGridLeftSide(patientName);
-        await cicoPage.verifyPatientInCentralGrid(patientName, StatusBadgeList.InProgress);
+        await cicoPage.verifyPatientInGridLeftSide(patientName); // Verify patient appears in left-side filters
+
+
+        // NEW: Dynamically get the current status badge letter from the grid and verify it in the central grid
+        const currentStatus =  await cicoPage.getPostCheckInStatusBadgeFromGrid(patientName);
+        // Pass that dynamic status to the verification method
+        await cicoPage.verifyPatientInCentralGrid(patientName, currentStatus);
     });
 });

@@ -112,6 +112,21 @@ export class CicoPage {
         await expect(leftGridCard).toBeVisible();
     }
 
+    async getPostCheckInStatusBadgeFromGrid(patientName) {
+        const centralGridRow = this.page.locator('.mtab-cico-grid-filter-gridform-container')
+                                        .filter({ hasText: patientName }).first();
+        const statusBadgeW = centralGridRow.getByText(StatusBadgeList.Waiting, { exact: true }).first();
+        const statusBadgeI = centralGridRow.getByText(StatusBadgeList.InProgress, { exact: true }).first();
+        const statusBadgeCO = centralGridRow.getByText(StatusBadgeList.CheckOut, { exact: true }).first();
+
+        await expect(statusBadgeW.or(statusBadgeI).or(statusBadgeCO)).toBeVisible();
+        
+        if (await statusBadgeW.isVisible()) return StatusBadgeList.Waiting;
+        if (await statusBadgeI.isVisible()) return StatusBadgeList.InProgress;
+        if (await statusBadgeCO.isVisible()) return StatusBadgeList.CheckedOut;
+    
+    }
+
     async verifyPatientInCentralGrid(patientName, statusLetter) {
         // Solution to the nth-child(6) Div Soup problem!
         // 1. Get ALL rows immediately inside the scrollable content

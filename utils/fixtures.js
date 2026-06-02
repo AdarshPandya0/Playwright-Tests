@@ -3,6 +3,8 @@ import { PatientListPage } from "../pages/PatientListPage";
 import { DocumentCenterPage } from "../pages/DocumentCenterPage";
 import { TopBar } from "../pages/TopBar";
 import { SchedulerPage } from "../pages/Scheduler";
+import { CicoPage } from "../pages/Cico";
+import { ScheduleAptPOSTAPI } from "./api/ScheduleAptPOSTAPI";
 import fs from 'fs';
 import path from "path";
 
@@ -130,7 +132,25 @@ export const test = base.extend({
     scheduler : async({ page }, use) => {
         const scheduler = new SchedulerPage(page);
         await use(scheduler);
+    },
+
+    cicoPage : async({ page }, use) => {
+        const cicoPage = new CicoPage(page);
+        await use(cicoPage);
+    },
+
+    scheduleApi: async({ page, request }, use) => {
+        const allCookies = await page.context().cookies();
+        const xTokenCookie = allCookies.find(c => c.name === 'x-token');
+        
+        if (!xTokenCookie) {
+            throw new Error('CRITICAL: Could not find live x-token for API injection!');
+        }
+
+        const scheduleApi = new ScheduleAptPOSTAPI(request, xTokenCookie.value);
+        await use(scheduleApi);
     }
+
 });
 
 export { expect } from "@playwright/test";

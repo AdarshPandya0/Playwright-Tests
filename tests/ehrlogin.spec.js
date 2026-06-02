@@ -37,3 +37,13 @@ test('Page Navigator to find locators', async({ page, scheduler}) => {
     await page.waitForTimeout(3000);
 
 });
+
+test('CICO Page Navigator to find locators', async( { page,  cicoPage } ) => {
+    await cicoPage.goto();
+
+    await page.waitForTimeout(2000);
+
+    await cicoPage.clickGridView();
+
+    await page.waitForTimeout(2000);
+});

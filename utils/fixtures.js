@@ -31,7 +31,7 @@ export const test = base.extend({
 
             // THE PACIFIER: Fake a successful logout so the frontend doesn't panic!
             await context.route('**/*logout*', route => {
-                console.log('Pacified malicious logout attempt! Faking a 200 OK.');
+                console.log('Prevented the logout call, Faking a 200 OK.');
                 route.fulfill({ 
                     status: 200, 
                     contentType: 'application/json', 
@@ -75,7 +75,7 @@ export const test = base.extend({
 
         // THE PACIFIER: Must be here too so Test 1's cleanup doesn't kill the token!
         await context.route('**/*logout*', route => {
-            console.log('Pacified malicious logout attempt on context close!');
+            console.log('Prevented the logout call, Faking a 200 OK.');
             route.fulfill({ 
                 status: 200, 
                 contentType: 'application/json', 

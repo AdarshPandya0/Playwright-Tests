@@ -128,7 +128,7 @@ export class CicoPage {
     }
 
     async verifyPatientInCentralGrid(patientName, statusLetter) {
-        // Solution to the nth-child(6) Div Soup problem!
+        // Solution to the nth-child(6) Div problem
         // 1. Get ALL rows immediately inside the scrollable content
         // 2. Filter down to only the row containing our specific patient name
         const centralGridRow = this.page.locator('.mtab-cico-grid-filter-gridform-container')

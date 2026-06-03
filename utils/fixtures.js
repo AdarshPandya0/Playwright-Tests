@@ -3,6 +3,8 @@ import { PatientListPage } from "../pages/PatientListPage";
 import { DocumentCenterPage } from "../pages/DocumentCenterPage";
 import { TopBar } from "../pages/TopBar";
 import { SchedulerPage } from "../pages/Scheduler";
+import { CicoPage } from "../pages/Cico";
+import { ScheduleAptPOSTAPI } from "./api/ScheduleAptPOSTAPI";
 import fs from 'fs';
 import path from "path";
 
@@ -29,7 +31,7 @@ export const test = base.extend({
 
             // THE PACIFIER: Fake a successful logout so the frontend doesn't panic!
             await context.route('**/*logout*', route => {
-                console.log('Pacified malicious logout attempt! Faking a 200 OK.');
+                console.log('Prevented the logout call, Faking a 200 OK.');
                 route.fulfill({ 
                     status: 200, 
                     contentType: 'application/json', 
@@ -73,7 +75,7 @@ export const test = base.extend({
 
         // THE PACIFIER: Must be here too so Test 1's cleanup doesn't kill the token!
         await context.route('**/*logout*', route => {
-            console.log('Pacified malicious logout attempt on context close!');
+            console.log('Prevented the logout call, Faking a 200 OK.');
             route.fulfill({ 
                 status: 200, 
                 contentType: 'application/json', 
@@ -130,7 +132,25 @@ export const test = base.extend({
     scheduler : async({ page }, use) => {
         const scheduler = new SchedulerPage(page);
         await use(scheduler);
+    },
+
+    cicoPage : async({ page }, use) => {
+        const cicoPage = new CicoPage(page);
+        await use(cicoPage);
+    },
+
+    scheduleApi: async({ page, request }, use) => {
+        const allCookies = await page.context().cookies();
+        const xTokenCookie = allCookies.find(c => c.name === 'x-token');
+        
+        if (!xTokenCookie) {
+            throw new Error('CRITICAL: Could not find live x-token for API injection!');
+        }
+
+        const scheduleApi = new ScheduleAptPOSTAPI(request, xTokenCookie.value);
+        await use(scheduleApi);
     }
+
 });
 
 export { expect } from "@playwright/test";

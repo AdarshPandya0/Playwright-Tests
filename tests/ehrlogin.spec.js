@@ -13,17 +13,9 @@ test('Verify global auth setup working', async( { page } ) => {
     await page.waitForTimeout(3000);    
 });
 
-test.skip('Find Locator', async( { page } ) => {
+test('Find Locator', async( { page } ) => {
 
-    await page.goto('/#/app/patient/edit/10005982342/documents')
-
-    await page.waitForTimeout(1000);
-
-    await page.getByText('Patient insurance card 123').click();
-
-    await page.waitForTimeout(1000);
-
-    await page.locator('.mtab-document-explorer-list-icon').first().click();
+    await page.goto('/#/app/setup/scheduler/event-type')
 
     await page.waitForTimeout(3000);
 })
@@ -36,4 +28,14 @@ test('Page Navigator to find locators', async({ page, scheduler}) => {
 
     await page.waitForTimeout(3000);
 
+});
+
+test('CICO Page Navigator to find locators', async( { page,  cicoPage } ) => {
+    await cicoPage.goto();
+
+    await page.waitForTimeout(2000);
+
+    await cicoPage.clickGridView();
+
+    await page.waitForTimeout(2000);
 });

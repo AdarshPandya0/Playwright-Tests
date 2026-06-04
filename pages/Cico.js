@@ -104,8 +104,9 @@ export class CicoPage {
     // ==========================================
     // GRID VIEW VALIDATIONS
     // ==========================================
+
+    //The below method is only for pre-check-in appointments as Left side card only displays not check-in appt.
     async verifyPatientInGridLeftSide(patientName) {
-        // Solution to your wildcard (*) problem: Use a RegExp!
         // By using `new RegExp(patientName)`, it matches the name regardless of what text comes after it (like HH:MM PM).
         const leftGridCard = this.page.locator('.mtab-appointment-widget-card-container-grid')
                                       .filter({ hasText: new RegExp(patientName, 'i') }).first();

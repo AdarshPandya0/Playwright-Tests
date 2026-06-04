@@ -125,4 +125,31 @@ export class ScheduleAptPOSTAPI {
 
         return await response.json();
     }
+
+    async deleteAppointment(apptId, lastModifiedDate) {
+        const payload = {
+            "id": apptId,
+            "lastModifiedDate": lastModifiedDate || Date.now()
+        };
+
+        const response = await this.request.delete(`/api/Schedule/${apptId}`, {
+            headers: {
+                'accept': 'application/json, text/plain, */*',
+                'content-type': 'application/json',
+                'origin': process.env.URL,
+                'referer': `${process.env.URL}/`,
+                'x-requestargs': 'iemoweb;0.0.1;NOTESANDALERTS;230c95c3-f3b0-41bb-9141-5fc15fef78e1;/app/scheduler',
+                'x-token': this.token
+            },
+            data: payload
+        });
+
+        if (response.status() !== 200) {
+            throw new Error(`API Appointment Deletion Failed! Status: ${response.status()} Body: ${await response.text()}`);
+        } else {
+            console.log(`Successfully deleted appointment with ID: ${apptId}`);
+        }
+
+        return await response.json();
+    }
 }

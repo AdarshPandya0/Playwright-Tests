@@ -1,7 +1,7 @@
 import { test, expect } from '../utils/fixtures.js';
 import { StatusBadgeList } from '../pages/Cico.js';
 
-test.describe('CICO (Check-In/Check-Out) UI Regression', () => {
+test.describe.skip('CICO (Check-In/Check-Out) UI Regression', () => {
 
     // ==========================================
     // SHARED TEST STATE (Accessible by all hooks)

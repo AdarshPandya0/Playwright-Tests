@@ -20,30 +20,37 @@ export const test = base.extend({
         const statePath = path.resolve(`.auth/state-${accountIndex}.json`);
         const sessionPath = path.resolve(`.auth/session-${accountIndex}.json`); 
 
+        const MAX_CACHE_AGE_HOURS = 3;
         let context;
 
         // ==========================================================
-        // FAST PATH: INJECT TOTAL BROWSER MEMORY
+        // STEP 1: CACHE AGE VALIDATION
         // ==========================================================
         if (fs.existsSync(statePath) && fs.existsSync(sessionPath)) {
-            
+            const stats = fs.statSync(statePath);
+            const ageInHours = (Date.now() - stats.mtimeMs) / (1000 * 60 * 60);
+
+            if (ageInHours > MAX_CACHE_AGE_HOURS) {
+                console.log(`Cached auth files are older than ${MAX_CACHE_AGE_HOURS} hours. Deleting...`);
+                fs.unlinkSync(statePath);
+                fs.unlinkSync(sessionPath);
+            }
+        }
+
+        // ==========================================================
+        // STEP 2: FAST PATH ATTEMPT
+        // ==========================================================
+        if (fs.existsSync(statePath) && fs.existsSync(sessionPath)) {
+            console.log('Attempting Fast Path Login...');
             context = await browser.newContext({ storageState: statePath });
 
-            // THE PACIFIER: Fake a successful logout so the frontend doesn't panic!
             await context.route('**/*logout*', route => {
-                console.log('Prevented the logout call, Faking a 200 OK.');
-                route.fulfill({ 
-                    status: 200, 
-                    contentType: 'application/json', 
-                    body: JSON.stringify({ success: true, message: "Fake logout successful" }) 
-                });
+                route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
             });
 
             const page = await context.newPage();
-
             await page.goto('/#/app/dashboard'); 
 
-            // Read and inject Session Storage
             const sessionData = fs.readFileSync(sessionPath, 'utf-8');
             await page.evaluate((data) => {
                 const parsedSession = JSON.parse(data);
@@ -52,35 +59,40 @@ export const test = base.extend({
                 }
             }, sessionData);
 
-            // Wake up the SPA router
             await page.goto('/#/app/dashboard'); 
 
             try {
+                // Wait for the Dashboard. If it redirects to login, this will fail!
                 await expect(page.getByRole('link', { name: "Dashboard" })).toBeVisible({ timeout: 5000 });
+                
+                // IF WE GET HERE, FAST PATH WAS A SUCCESS!
+                await use(page);
+                await context.close();
+                return; // Exit the fixture completely!
+                
             } catch (error) {
+                // IF WE GET HERE, THE TOKEN WAS DEAD (401 Redirect)
+                console.log('Fast path failed (Token likely expired server-side / Logout Attempt). Falling back to Slow Path...');
+                
+                // Delete the poisoned files so they aren't used again
                 fs.unlinkSync(statePath);
                 fs.unlinkSync(sessionPath);
-                throw new Error(`CRITICAL: The router killed the session;  deleted the poisoned files. Please re-run.`);
+                
+                // Close the broken context
+                await context.close();
+                
+                // DO NOT THROW AN ERROR. Let the code continue down to the Slow Path!
             }
-            
-            await use(page);
-            await context.close();
-            return; 
         } 
         
         // ==========================================================
-        // SLOW PATH: LOG IN AND CLONE TOTAL MEMORY
+        // STEP 3: SLOW PATH (Runs if no files exist, or if Fast Path failed!)
         // ==========================================================
+        console.log('Executing Slow Path Login...');
         context = await browser.newContext();
 
-        // THE PACIFIER: Must be here too so Test 1's cleanup doesn't kill the token!
         await context.route('**/*logout*', route => {
-            console.log('Prevented the logout call, Faking a 200 OK.');
-            route.fulfill({ 
-                status: 200, 
-                contentType: 'application/json', 
-                body: JSON.stringify({ success: true }) 
-            });
+            route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
         });
 
         const setupPage = await context.newPage();
@@ -89,15 +101,14 @@ export const test = base.extend({
         await setupPage.locator('#clinic input').fill(clinic);
         await setupPage.locator('#username input').fill(dynamicUsername);
         await setupPage.locator('#password input').fill(dynamicPassword);
-        //await setupPage.locator('p-checkbox').click();
         await setupPage.getByRole('button', { name: 'Login' }).click();
 
         await expect(setupPage.getByRole('link', { name: "Dashboard" })).toBeVisible();
 
-        // 1. Snapshot Cookies and Local Storage
+        // Snapshot Cookies and Local Storage
         await context.storageState({ path: statePath });
 
-        // 2. BULLETPROOF EXTRACTION: Use a hard loop to grab every single sessionStorage key
+        // Extract Session Storage
         const sessionStorageData = await setupPage.evaluate(() => {
             const data = {};
             for (let i = 0; i < window.sessionStorage.length; i++) {

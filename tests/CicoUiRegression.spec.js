@@ -35,6 +35,7 @@ test.describe('CICO (Check-In/Check-Out) UI Regression', () => {
     // ==========================================
     // TEARDOWN: Runs after the test (Even if it fails!)
     // ==========================================
+    
     test.afterEach(async ({ scheduleApi }) => {
         // Only attempt deletion if the ID was successfully captured
         if (createdApptId) {
@@ -60,6 +61,7 @@ test.describe('CICO (Check-In/Check-Out) UI Regression', () => {
 
         // PHASE 3: ASSERT
         // (Panel View validations)
+        await page.waitForTimeout(2000); // Buffer for any frontend updates after check-in
         await cicoPage.verifyPatientInWaitingOrInProgress(patientName);
         
         // (Grid View validations)

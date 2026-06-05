@@ -147,7 +147,7 @@ export class ScheduleAptPOSTAPI {
         if (response.status() !== 200) {
             throw new Error(`API Appointment Deletion Failed! Status: ${response.status()} Body: ${await response.text()}`);
         } else {
-            console.log(`Successfully deleted appointment with ID: ${apptId}`);
+            console.log(`Action Status : ${response() || 'Deleted Successfully'}`);
         }
 
         return await response.json();

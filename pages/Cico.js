@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { BasePage } from './BasePage.js'; 
 
 
 export const StatusBadgeList = Object.freeze({
@@ -7,8 +8,10 @@ export const StatusBadgeList = Object.freeze({
   CheckOut: 'O'
 });
 
-export class CicoPage {
+// main POM for CICO extended with BasePage to handle propmts
+export class CicoPage extends BasePage {
     constructor(page) {
+        super(page); // Pass the Page Context up to the BasePAge for the modal handling and shared locators
         this.page = page;
         
         // Base View Locators
@@ -75,10 +78,11 @@ export class CicoPage {
         // Scope the click strictly to that specific patient's card!
         // (Using a simpler selector, but you can swap to your longer one if it's strictly necessary)
         await patientCard.locator('.mtab-xxx-hide > .mtab-xxx-36').first().click();
-        await this.page.waitForTimeout(5000); // Wait for the check-in action to process
-        if ( await this.page.getByRole('button', { name: 'Yes' }).isVisible() ) {
-            await this.page.getByRole('button', { name: 'Yes' }).click();
-        } 
+        await this.page.waitForTimeout(4000); // Buffer for any immediate frontend changes
+        await this.page.waitForLoadState('networkidle');
+
+        // Handle any modals that pop up during check-in
+        await this.handlePotentialModal(`Check-In for ${patientName}`);
     }
 
     // ==========================================

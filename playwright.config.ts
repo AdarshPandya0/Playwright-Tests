@@ -1,0 +1,73 @@
+import { defineConfig, devices } from '@playwright/test';
+
+import dotenv from "dotenv";
+import path from 'path';
+// dotenv.config({ path: path.resolve(__dirname, '.env') });
+
+dotenv.config({
+  path: `./.env/.env.${process.env.ENV || 'local'}`,
+});
+
+/**
+ * @see https://playwright.dev/docs/test-configuration
+ */
+export default defineConfig({
+  testDir: './tests',
+
+  timeout: 60000,
+
+  //globalSetup: './utils/global.setup.ts',
+  /* Run tests in files in parallel */
+  fullyParallel: true,
+  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  forbidOnly: !!process.env.CI,
+  /* Retry on CI only */
+  retries: process.env.CI ? 2 : 0,
+  /* Opt out of parallel tests on CI. */
+  workers: 4,
+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  reporter: 'html',
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  use: {
+        trace: 'retain-on-failure',
+        video: 'retain-on-failure',
+        screenshot: 'only-on-failure',
+
+        baseURL: process.env.URL,
+        viewport: { width: 1920, height: 1080 },
+
+        ignoreHTTPSErrors: true, // Ignore HTTPS errors for self-signed certs, adjust as needed for your app1
+  },
+
+  /* Configure projects for major browsers */
+  projects: [
+    {
+      name: 'setup',
+      testDir : './setup',
+      testMatch : '**/*.setup.{js,ts}'
+    },
+
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+  
+    },
+
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+
+    },
+
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+
+    },
+  ],
+
+  expect: {
+    timeout: 20000, //Global timeout for all expect assertions
+  }
+});
+

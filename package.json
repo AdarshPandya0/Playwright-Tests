@@ -2,7 +2,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.8.0",
+    "@types/node": "^25.9.4",
     "cross-env": "^10.1.0"
   },
   "dependencies": {
@@ -21,7 +21,7 @@
     "test:prod:shard:1": "cross-env ENV=prod PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-1 npx playwright test --shard=1/4 --project=chromium --reporter=blob",
     "test:prod:shard:2": "cross-env ENV=prod PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-2 npx playwright test --shard=2/4 --project=chromium --reporter=blob",
     "test:prod:shard:3": "cross-env ENV=prod PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-3 npx playwright test --shard=3/4 --project=chromium --reporter=blob",
-    "test:prod:shard:4": "cross-env ENV=prod PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-4 npx playwright test --shard=4/4 --project=chromium --reporter=blob",    
+    "test:prod:shard:4": "cross-env ENV=prod PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-4 npx playwright test --shard=4/4 --project=chromium --reporter=blob",
     "test:local:shard:1": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-1 npx playwright test --shard=1/4  --project=chromium --reporter=blob",
     "test:local:shard:2": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-2 npx playwright test --shard=2/4 --project=chromium --reporter=blob",
     "test:local:shard:3": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-3 npx playwright test --shard=3/4 --project=chromium --reporter=blob",
@@ -30,6 +30,5 @@
     "test:local:sharded": "node utils/cleanup.js && npm-run-all --parallel test:local:shard:1 test:local:shard:2 test:local:shard:3 test:local:shard:4",
     "test:ci": "cross-env ENV=prod npx playwright test",
     "test:chrm:ci": "cross-env ENV=prod npx playwright test --project=chromium"
-
   }
 }

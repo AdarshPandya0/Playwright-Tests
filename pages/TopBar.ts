@@ -1,4 +1,4 @@
-import { expect, Page, Locator } from "@playwright/test";
+import { Page, Locator } from "@playwright/test";
 
 export class TopBar {
     // 1. DECLARE PROPERTIES: Tell TypeScript what objects live inside this class.

@@ -1,7 +1,6 @@
-import { test , expect } from "../utils/fixtures.js";
+import { test, expect } from "../utils/fixtures";
 
-test('Verify Patient Import Sample Download', async({ page, patientPage }) => {
-
+test('Verify Patient Import Sample Download', async ({ page, patientPage }) => {
     await patientPage.goto();
 
     await page.locator('.ui-splitbutton-menubutton.ng-tns-c128-15').click();
@@ -12,8 +11,7 @@ test('Verify Patient Import Sample Download', async({ page, patientPage }) => {
 
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toBe('Import Patient Sample.csv'); 
+    expect(download.suggestedFilename()).toBe('Import Patient Sample.csv');
 
     await download.saveAs('./test-results/downloads/' + download.suggestedFilename());
-
 });

@@ -1,27 +1,34 @@
-// pages/BasePage.js
+import { Page, Locator } from "@playwright/test";
 
+/**
+ * Shared behaviour for every Page Object in this project.
+ * Page Objects for a specific screen (TopBar, Scheduler, Cico, ...) extend this
+ * class with `extends BasePage` so they automatically get modal handling.
+ */
 export class BasePage {
-    constructor(page) {
+    readonly page: Page;
+
+    constructor(page: Page) {
         this.page = page;
     }
 
     /**
      * PrimeNG Modal Catcher
-     * @param {string} contextName - To Help track exactly where the modal popped up in the logs
+     * @param contextName - Helps track exactly where the modal popped up in the logs
      */
-    async handlePotentialModal(contextName = 'Unknown Action') {
+    async handlePotentialModal(contextName = 'Unknown Action'): Promise<void> {
         // 1. Target the PrimeNG dialog container
-        const modalContainer = this.page.locator('.ui-dialog').first();
-        
+        const modalContainer: Locator = this.page.locator('.ui-dialog').first();
+
         try {
             // Wait briefly for the dialog animation to finish rendering
             await modalContainer.waitFor({ state: 'visible', timeout: 1500 });
-            
+
             // 2. Extract the Title and Body cleanly based on your DOM structure
             const titleText = await modalContainer.locator('.ui-dialog-title').innerText();
             const bodyText = await modalContainer.locator('.ui-dialog-content').innerText();
-            const cleanBody = bodyText.replace(/\n/g, ' | ').trim(); 
-            
+            const cleanBody = bodyText.replace(/\n/g, ' | ').trim();
+
             console.log(`\n========================================`);
             console.log(`A Prompt Appeared during [${contextName}]`);
             console.log(`TITLE: ${titleText}`);
@@ -30,9 +37,8 @@ export class BasePage {
 
             // 3. Look for the exact button IDs from your screenshot
             const yesBtn = modalContainer.locator('button#YES');
-            const noBtn = modalContainer.locator('button#NO');
             const closeXBtn = modalContainer.locator('.ui-dialog-titlebar-close'); // The 'X' in the top right
-            
+
             // Optional: If you have generic "Ok" buttons on error popups
             const okBtn = modalContainer.getByRole('button', { name: 'Ok', exact: true });
 
@@ -40,28 +46,28 @@ export class BasePage {
             if (await yesBtn.isVisible()) {
                 console.log(`Action: Clicking 'Yes' to proceed.`);
                 await yesBtn.click();
-                
+
                 // Wait for the PrimeNG exit animation to finish so the DOM is clear
                 await modalContainer.waitFor({ state: 'hidden', timeout: 3000 });
-                return; 
+                return;
             }
 
             // SCENARIO B: Error or Warning Prompt (No 'Yes' button, just Ok/Close)
             if (await okBtn.isVisible() || await closeXBtn.isVisible() || cleanBody.toLowerCase().includes('error')) {
-                
+
                 // Try to dismiss it cleanly so the browser isn't locked
                 if (await okBtn.isVisible()) {
                     await okBtn.click();
                 } else if (await closeXBtn.isVisible()) {
                     await closeXBtn.click();
                 }
-                
+
                 // Crash the test with the exact UI error message
                 throw new Error(`ERROR PROMPT during [${contextName}]: [${titleText}] ${cleanBody}`);
             }
 
         } catch (error) {
-            if (error.message.includes('ERROR PROMPT')) {
+            if (error instanceof Error && error.message.includes('ERROR PROMPT')) {
                 throw error; // Fail the test
             }
             // If it's a TimeoutError, no modal appeared. Happy path! Let it continue silently.

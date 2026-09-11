@@ -22,7 +22,7 @@ type EHRFixtures = {
 export const test = base.extend<EHRFixtures>({
     
     page: async ({ browser }, use, testInfo) => {
-        let accountIndex = testInfo.config.shard ? testInfo.config.shard.current : (testInfo.parallelIndex % 4) + 1; 
+        const accountIndex = testInfo.config.shard ? testInfo.config.shard.current : (testInfo.parallelIndex % 4) + 1;
 
         const dynamicUsername = process.env[`EHR_USERNAME_${accountIndex}`] as string;
         const dynamicPassword = process.env[`EHR_PASSWORD_${accountIndex}`] as string;
@@ -82,7 +82,7 @@ export const test = base.extend<EHRFixtures>({
                 await context.close();
                 return; // Exit the fixture completely!
                 
-            } catch (error) {
+            } catch {
                 // IF WE GET HERE, THE TOKEN WAS DEAD (401 Redirect)
                 console.log('Fast path failed (Token likely expired server-side / Logout Attempt). Falling back to Slow Path...');
                 

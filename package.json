@@ -3,16 +3,23 @@
     "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.9.4",
-    "cross-env": "^10.1.0"
+    "cross-env": "^10.1.0",
+    "eslint": "^10.10.0",
+    "eslint-plugin-playwright": "^2.11.0",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.0"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
     "npm-run-all": "^4.1.5"
   },
   "scripts": {
-    "clean": "node utils/cleanup.js",
+    "clean": "tsx utils/cleanup.ts",
     "test": "npx playwright test",
-    "report:merge": "node ./utils/hoist-blobs.js && npx playwright merge-reports --reporter html ./blob-report",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "report:merge": "tsx utils/hoist-blobs.ts && npx playwright merge-reports --reporter html ./blob-report",
     "test:ui:local": "cross-env ENV=local npx playwright test --ui",
     "test:ui:prod": "cross-env ENV=prod npx playwright test --ui",
     "test:prod:targeted": "cross-env ENV=prod npx playwright test --grep @targeted",
@@ -26,8 +33,8 @@
     "test:local:shard:2": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-2 npx playwright test --shard=2/4 --project=chromium --reporter=blob",
     "test:local:shard:3": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-3 npx playwright test --shard=3/4 --project=chromium --reporter=blob",
     "test:local:shard:4": "cross-env ENV=local PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report/blob-report-4 npx playwright test --shard=4/4 --project=chromium --reporter=blob",
-    "test:prod:sharded": "node utils/cleanup.js && npm-run-all --parallel test:prod:shard:1 test:prod:shard:2 test:prod:shard:3 test:prod:shard:4",
-    "test:local:sharded": "node utils/cleanup.js && npm-run-all --parallel test:local:shard:1 test:local:shard:2 test:local:shard:3 test:local:shard:4",
+    "test:prod:sharded": "tsx utils/cleanup.ts && npm-run-all --parallel test:prod:shard:1 test:prod:shard:2 test:prod:shard:3 test:prod:shard:4",
+    "test:local:sharded": "tsx utils/cleanup.ts && npm-run-all --parallel test:local:shard:1 test:local:shard:2 test:local:shard:3 test:local:shard:4",
     "test:ci": "cross-env ENV=prod npx playwright test",
     "test:chrm:ci": "cross-env ENV=prod npx playwright test --project=chromium"
   }

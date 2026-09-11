@@ -1,0 +1,33 @@
+{
+  "data": {
+    "messages": [],
+    "pagination": {
+      "count": 2,
+      "size": 10,
+      "page": 1
+    },
+    "result": [
+      {
+        "id": 100062,
+        "clientId": 10006,
+        "lastModifiedDate": 1764061791412,
+        "sequence": 1,
+        "count": 2,
+        "isActive": true,
+        "color": "#3ddb59",
+        "name": "Discussion"
+      },
+      {
+        "id": 100061,
+        "clientId": 10006,
+        "lastModifiedDate": 1763365287534,
+        "sequence": 1,
+        "count": 2,
+        "isActive": true,
+        "color": "#51f1d9",
+        "name": "General Meeting"
+      }
+    ]
+  },
+  "status": "success"
+}

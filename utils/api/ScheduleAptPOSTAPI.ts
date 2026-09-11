@@ -8,7 +8,7 @@ export interface ScheduleApiResponse {
             id?: number;
             lastModifiedDate?: number;
         } | number;
-        messages?: any[];
+        messages?: unknown[];
     }
 }
 

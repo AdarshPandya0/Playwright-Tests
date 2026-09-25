@@ -1,10 +1,13 @@
-import { test as base, expect, BrowserContext } from "@playwright/test";
+import { test as base, expect, BrowserContext, Page, TestInfo } from "@playwright/test";
 import { PatientListPage } from "../pages/PatientListPage";
 import { DocumentCenterPage } from "../pages/DocumentCenterPage";
 import { TopBar } from "../pages/TopBar";
 import { SchedulerPage } from "../pages/Scheduler";
 import { CicoPage } from "../pages/Cico";
 import { ScheduleAptPOSTAPI } from "./api/ScheduleAptPOSTAPI";
+import { LookupAPI } from "./api/LookupAPI";
+import { PatientAPI, PatientRecord } from "./api/PatientAPI";
+import { configuredAccountCount } from "./testData";
 import fs from 'fs';
 import path from "path";
 
@@ -16,13 +19,49 @@ type EHRFixtures = {
     scheduler: SchedulerPage;
     cicoPage: CicoPage;
     scheduleApi: ScheduleAptPOSTAPI;
+    lookupApi: LookupAPI;
+    patientApi: PatientAPI;
+    /** Reusable patient owned by this worker's account (patients can't be deleted, so it's find-or-create). */
+    seedPatient: PatientRecord;
+}
+
+/** Which EHR_USERNAME_n account this worker logs in with. */
+function accountIndexFor(testInfo: TestInfo): number {
+    return testInfo.config.shard
+        ? testInfo.config.shard.current
+        : (testInfo.parallelIndex % configuredAccountCount()) + 1;
+}
+
+/** The live auth token the app stores in the x-token cookie after login. */
+async function liveToken(page: Page): Promise<string> {
+    const xTokenCookie = (await page.context().cookies()).find(c => c.name === 'x-token');
+    if (!xTokenCookie) {
+        throw new Error('CRITICAL: Could not find live x-token for API injection!');
+    }
+    return xTokenCookie.value;
+}
+
+/**
+ * After a new build, each account sees a one-time "Release Note - vX.Y.Z" dialog whose mask
+ * blocks every click. Acknowledge it so tests don't depend on whether this account has seen it.
+ */
+async function dismissReleaseNoteIfShown(page: Page, waitMs: number): Promise<void> {
+    const releaseNote = page.getByRole('dialog').filter({ hasText: /Release Note - v/ });
+    try {
+        await releaseNote.waitFor({ state: 'visible', timeout: waitMs });
+    } catch {
+        return; // Not shown for this account
+    }
+    console.log('Dismissing release note dialog...');
+    await releaseNote.getByRole('button', { name: 'OK' }).click();
+    await expect(releaseNote).toBeHidden();
 }
 
 // 2. THE EXTENSION: We pass our menu into base.extend<>
 export const test = base.extend<EHRFixtures>({
-    
+
     page: async ({ browser }, use, testInfo) => {
-        const accountIndex = testInfo.config.shard ? testInfo.config.shard.current : (testInfo.parallelIndex % 4) + 1;
+        const accountIndex = accountIndexFor(testInfo);
 
         const dynamicUsername = process.env[`EHR_USERNAME_${accountIndex}`] as string;
         const dynamicPassword = process.env[`EHR_PASSWORD_${accountIndex}`] as string;
@@ -76,7 +115,8 @@ export const test = base.extend<EHRFixtures>({
             try {
                 // Wait for the Dashboard. If it redirects to login, this will fail!
                 await expect(page.getByRole('link', { name: "Dashboard" })).toBeVisible({ timeout: 5000 });
-                
+                await dismissReleaseNoteIfShown(page, 500);
+
                 // IF WE GET HERE, FAST PATH WAS A SUCCESS!
                 await use(page);
                 await context.close();
@@ -116,6 +156,7 @@ export const test = base.extend<EHRFixtures>({
         await setupPage.getByRole('button', { name: 'Login' }).click();
 
         await expect(setupPage.getByRole('link', { name: "Dashboard" })).toBeVisible();
+        await dismissReleaseNoteIfShown(setupPage, 3000);
 
         // Snapshot Cookies and Local Storage
         await context.storageState({ path: statePath });
@@ -165,15 +206,24 @@ export const test = base.extend<EHRFixtures>({
     },
 
     scheduleApi: async({ page, request }, use) => {
-        const allCookies = await page.context().cookies();
-        const xTokenCookie = allCookies.find(c => c.name === 'x-token');
-        
-        if (!xTokenCookie) {
-            throw new Error('CRITICAL: Could not find live x-token for API injection!');
-        }
+        await use(new ScheduleAptPOSTAPI(request, await liveToken(page)));
+    },
 
-        const scheduleApi = new ScheduleAptPOSTAPI(request, xTokenCookie.value);
-        await use(scheduleApi);
+    lookupApi: async({ page, request }, use) => {
+        await use(new LookupAPI(request, await liveToken(page)));
+    },
+
+    patientApi: async({ page, request }, use) => {
+        await use(new PatientAPI(request, await liveToken(page)));
+    },
+
+    seedPatient: async({ patientApi }, use, testInfo) => {
+        const index = accountIndexFor(testInfo);
+        await use(await patientApi.findOrCreate({
+            firstName: `Worker${index}`,
+            lastName: 'PWAuto',
+            uID: `999001${String(index).padStart(3, '0')}`,
+        }));
     }
 
 });

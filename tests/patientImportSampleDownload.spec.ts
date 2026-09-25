@@ -3,7 +3,8 @@ import { test, expect } from "../utils/fixtures";
 test('Verify Patient Import Sample Download', async ({ page, patientPage }) => {
     await patientPage.goto();
 
-    await page.locator('.ui-splitbutton-menubutton.ng-tns-c128-15').click();
+    // Dropdown arrow of the "Import Patient" split button (the ng-tns-* class differs per build)
+    await page.locator('.ui-splitbutton').filter({ hasText: 'Import Patient' }).locator('.ui-splitbutton-menubutton').click();
 
     const downloadPromise = page.waitForEvent('download');
 

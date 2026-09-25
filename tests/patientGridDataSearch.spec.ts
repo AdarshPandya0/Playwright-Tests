@@ -4,17 +4,26 @@ import AxeBuilder from '@axe-core/playwright';
 
 interface PatientSearchCase {
     testId: string;
-    searchName: string;
-    expectedResult: string;
+    /** Search for this worker's seed patient instead of a fixed name (which may not exist in every clinic). */
+    useSeedPatient?: boolean;
+    searchName?: string;
+    expectedResult?: string;
     shouldFind: boolean;
 }
 
 for (const data of searchData as PatientSearchCase[]) {
-    test(`[${data.testId}] Verify Patient Search for: ${data.searchName}`, async ({ page, patientPage }) => {
+    const title = data.useSeedPatient ? 'seed patient' : data.searchName;
+
+    test(`[${data.testId}] Verify Patient Search for: ${title}`, async ({ page, patientPage, seedPatient }) => {
+        const searchName = data.useSeedPatient ? seedPatient.firstName : data.searchName!;
+        const expectedResult = data.useSeedPatient
+            ? `${seedPatient.lastName}, ${seedPatient.firstName}`
+            : data.expectedResult!;
+
         await patientPage.goto();
 
         await expect(async () => {
-            await patientPage.searchForPatient(data.searchName);
+            await patientPage.searchForPatient(searchName);
         }).toPass();
 
         await page.waitForLoadState('networkidle');
@@ -22,7 +31,7 @@ for (const data of searchData as PatientSearchCase[]) {
         if (data.shouldFind) {
             const patientGrid = page.locator('.mtab-primary-panel');
             await expect(async () => {
-                await expect(patientGrid).toContainText(data.expectedResult);
+                await expect(patientGrid).toContainText(expectedResult);
             }).toPass();
         } else {
             const noRecordsMsg = page.getByText("No Patient Found. click 'Add Patient' button to register new Patient.");

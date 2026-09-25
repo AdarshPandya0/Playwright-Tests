@@ -2,7 +2,7 @@ import { expect, Page, Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
 
 export const StatusBadgeList = Object.freeze({
-    Waiting: 'name',
+    Waiting: 'W',
     InProgress: 'I',
     CheckOut: 'O',
 });
@@ -25,6 +25,7 @@ export class CicoPage extends BasePage {
     readonly facilityDropdownFooterAddBtn: Locator;
     readonly apptsSearchInput: Locator;
     readonly gridApptListSearchInput: Locator;
+    readonly appointmentDetailsModal: Locator;
 
     constructor(page: Page) {
         super(page); // Pass the Page context up to BasePage for modal handling and shared locators
@@ -44,6 +45,8 @@ export class CicoPage extends BasePage {
 
         this.apptsSearchInput = this.apptsWidget.getByRole('textbox', { name: /Patient name, Chart#, DOB/i });
         this.gridApptListSearchInput = this.gridApptList.getByRole('textbox', { name: /Patient name, Chart#, DOB/i });
+
+        this.appointmentDetailsModal = page.locator('.mtab-appointment-details-modal-container');
     }
 
     // ==========================================
@@ -94,6 +97,19 @@ export class CicoPage extends BasePage {
 
         // Handle any modals that pop up during check-in
         await this.handlePotentialModal(`Check-In for ${patientName}`);
+
+        // Some clinics open the appointment details dialog once check-in completes
+        await this.closeAppointmentDetailsIfOpen();
+    }
+
+    async closeAppointmentDetailsIfOpen(): Promise<void> {
+        try {
+            await this.appointmentDetailsModal.waitFor({ state: 'visible', timeout: 3000 });
+        } catch {
+            return; // Dialog didn't open for this clinic
+        }
+        await this.appointmentDetailsModal.getByRole('button', { name: 'Cancel' }).click();
+        await expect(this.appointmentDetailsModal).toBeHidden();
     }
 
     // ==========================================

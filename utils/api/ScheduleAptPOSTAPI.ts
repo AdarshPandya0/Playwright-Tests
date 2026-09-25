@@ -1,5 +1,7 @@
-// utils/api/ScheduleAptPOSTAPI.js
-import { APIRequestContext } from "@playwright/test";
+import { ApiClient, RequestOrigin } from "./ApiClient";
+import { LookupAPI } from "./LookupAPI";
+
+const SCHEDULER: RequestOrigin = { module: 'NOTESANDALERTS', route: '/app/scheduler' };
 
 export interface ScheduleApiResponse {
     status: string;
@@ -12,24 +14,18 @@ export interface ScheduleApiResponse {
     }
 }
 
-
-export class ScheduleAptPOSTAPI {
-
-    readonly request: APIRequestContext;
-    readonly token: string;
-
-    constructor(requestContext: APIRequestContext, liveToken: string) {
-        this.request = requestContext;
-        this.token = liveToken;
-    }
+export class ScheduleAptPOSTAPI extends ApiClient {
 
     async createAppointmentForToday(patientId: number): Promise<ScheduleApiResponse> {
-        // 1. Generate an epoch timestamp for 1 hour from now to ensure it shows up in "Appts"
+        // 1. Resolve this clinic's facility/provider/visit type/status IDs (cached per worker)
+        const ctx = await new LookupAPI(this.request, this.token).schedulingContext();
+
+        // 2. Generate an epoch timestamp for 1 hour from now to ensure it shows up in "Appts"
         const oneHourFromNow = new Date();
         oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
         const fromTimeMs = oneHourFromNow.getTime();
 
-        // 2. Payload
+        // 3. Payload
         const payload = {
                 "id": null,
                 "fromTime": fromTimeMs,
@@ -39,25 +35,25 @@ export class ScheduleAptPOSTAPI {
                 "contactNumber": null,
                 "patientDOB": null,
                 "patientId": patientId,
-                "facilityId": 10005192,
-                "visitTypeId": 1000534,
+                "facilityId": ctx.facilityId,
+                "visitTypeId": ctx.visitTypeId,
                 "billingProviderId": null,
                 "note": null,
-                "statusId": 100051311,
+                "statusId": ctx.statusId,
                 "isAuthorizationRequired": false,
                 "lastModifiedDate": null,
                 "reasonCode": null,
                 "reasonCodeTypeId": null,
-                "appointmentTypeId": 1000580,
+                "appointmentTypeId": ctx.appointmentTypeId,
                 "checkInTime": null,
                 "checkOutTime": null,
                 "vnId": null,
                 "visitModeId": null,
                 "roomId": null,
-                "providerId": 100053557,
+                "providerId": ctx.providerId,
                 "tokenNo": null,
                 "copay": null,
-                "clinicalSpecialtyId": 10005200,
+                "clinicalSpecialtyId": ctx.specialtyId,
                 "procedureDetailIds": null,
                 "resourceIds": null,
                 "availabilityFromTime": null,
@@ -77,11 +73,11 @@ export class ScheduleAptPOSTAPI {
                         {
                             "id": null,
                             "scheduleId": null,
-                            "employeeId": 100053557,
-                            "roleId": 1000560,
+                            "employeeId": ctx.providerId,
+                            "roleId": ctx.roleId,
                             "sequence": null,
                             "isSignOffRequired": true,
-                            "signOffStatusId": 100051479,
+                            "signOffStatusId": ctx.signOffStatusId,
                             "note": null,
                             "lastModifiedDate": null,
                             "highlighted": [],
@@ -101,8 +97,8 @@ export class ScheduleAptPOSTAPI {
                 "recurringAppointmentId": null,
                 "pOSId": null,
                 "encounterClassId": null,
-                "serviceLocationTypeId": 100051442,
-                "serviceLocationId": 10005192,
+                "serviceLocationTypeId": ctx.serviceLocationTypeId,
+                "serviceLocationId": ctx.facilityId,
                 "isEncounter": true,
                 "isBillable": true,
                 "isServiceLocation": true,
@@ -119,24 +115,8 @@ export class ScheduleAptPOSTAPI {
                 "referringProviderTypeId": null
             };
 
-        // 3. Fire the request
-        const response = await this.request.post('/api/Schedule', {
-            headers: {
-                'accept': 'application/json, text/plain, */*',
-                'content-type': 'application/json',
-                'origin': process.env.URL!,
-                'referer': `${process.env.URL}/`,
-                'x-requestargs': 'iemoweb;0.0.1;NOTESANDALERTS;230c95c3-f3b0-41bb-9141-5fc15fef78e1;/app/scheduler',
-                'x-token': this.token
-            },
-            data: payload
-        });
-
-        if (response.status() !== 200) {
-            throw new Error(`API Appointment Seeding Failed! Status: ${response.status()} Body: ${await response.text()}`);
-        }
-
-        return await response.json();
+        // 4. Fire the request
+        return await this.send('POST', '/api/Schedule', SCHEDULER, payload) as ScheduleApiResponse;
     }
 
     async deleteAppointment(apptId: number, lastModifiedDate?: number): Promise<ScheduleApiResponse> {
@@ -145,24 +125,8 @@ export class ScheduleAptPOSTAPI {
             "lastModifiedDate": lastModifiedDate || Date.now()
         };
 
-        const response = await this.request.delete(`/api/Schedule/${apptId}`, {
-            headers: {
-                'accept': 'application/json, text/plain, */*',
-                'content-type': 'application/json',
-                'origin': process.env.URL!,
-                'referer': `${process.env.URL}/`,
-                'x-requestargs': 'iemoweb;0.0.1;NOTESANDALERTS;230c95c3-f3b0-41bb-9141-5fc15fef78e1;/app/scheduler',
-                'x-token': this.token
-            },
-            data: payload
-        });
-
-        if (response.status() !== 200) {
-            throw new Error(`API Appointment Deletion Failed! Status: ${response.status()} Body: ${await response.text()}`);
-        } else {
-            console.log(`Action Status : ${response.statusText() || 'Deleted Successfully'}`);
-        }
-
-        return await response.json() as ScheduleApiResponse;
+        const response = await this.send('DELETE', `/api/Schedule/${apptId}`, SCHEDULER, payload) as ScheduleApiResponse;
+        console.log(`Action Status : ${response.status || 'Deleted Successfully'}`);
+        return response;
     }
 }

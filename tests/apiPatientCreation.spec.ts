@@ -1,7 +1,7 @@
 import { test, expect } from "../utils/fixtures";
-import newPatientTemplate from '../data/newPatientTemplate.json';
 
-test.skip('Create Patient via API and verify in UI', async ({ page, patientPage }) => {
+// Note: patients can't be deleted, so every run of this test leaves one "Jones, Adam<stamp>" patient behind.
+test('Create Patient via API and verify in UI', async ({ page, patientPage, patientApi }) => {
     // ==========================================
     // PHASE 1: ARRANGE (Generate Unique Data)
     // ==========================================
@@ -10,46 +10,17 @@ test.skip('Create Patient via API and verify in UI', async ({ page, patientPage 
     const uniqueFirstName = `Adam${uniqueStamp}`;
     const uniqueUID = `99900${uniqueStamp.slice(-4)}`; // Keeps the 9-digit format
 
-    // Extract the auth token from the browser's cookies to authenticate the API call directly.
-    const allCookies = await page.context().cookies();
-    const xTokenCookie = allCookies.find((c) => c.name === 'x-token');
-
-    // If the token isn't found, stop the test immediately and warn us!
-    expect(xTokenCookie, 'CRITICAL: Could not find live x-token in browser cookies!').toBeDefined();
-
-    const liveAuthToken = xTokenCookie!.value;
-    const patientPayload = {
-        ...newPatientTemplate,
+    // ==========================================
+    // PHASE 2: ACT (Create the patient through the backend)
+    // ==========================================
+    // PatientAPI resolves this clinic's facility/sex/address/country IDs before posting
+    const created = await patientApi.create({
         firstName: uniqueFirstName,
+        lastName: 'Jones',
         uID: uniqueUID,
-    };
-
-    // ==========================================
-    // PHASE 2: ACT (Fire the API Request)
-    // ==========================================
-    const response = await page.request.post('/api/patient', {
-        headers: {
-            'accept': 'application/json, text/plain, */*',
-            'content-type': 'application/json',
-
-            // 1. Add the security origin headers
-            'origin': process.env.URL!,
-            'referer': `${process.env.URL}`,
-
-            // 2. Add the custom routing header exactly as Postman has it
-            'x-requestargs': 'iemoweb;0.0.1;PATIENTDEMOGRAPHICS;718ec9e7-4415-4b4d-ba54-49a66b2d09a9;/app/patient/create',
-
-            'x-token': liveAuthToken,
-        },
-        data: patientPayload,
     });
 
-    // Let's log the response body if it fails so we can see the exact error the server throws
-    if (response.status() !== 200) {
-        console.log(await response.text());
-    }
-
-    expect(response.status()).toBe(200);
+    expect(created.id).toBeTruthy();
 
     // ==========================================
     // PHASE 3: ASSERT (Verify in the UI)

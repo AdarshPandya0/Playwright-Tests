@@ -1,17 +1,19 @@
 import { test, expect } from "../utils/fixtures";
 
-// Flow: go to /patient -> open filters if not already open -> search "cassius" -> verify
-// "Thunderfolk, Cassius" is in the results -> print facesheet -> open the patient ->
+// Flow: go to /patient -> open filters if not already open -> search this worker's seed patient ->
+// verify "PWAuto, Worker<n> (<chart#>)" is in the results -> print facesheet -> open the patient ->
 // navigate to Documents -> open the Face Sheet folder -> verify the newest record opens
 // in the viewer.
 
-test.skip('Verify Print Facesheet functionality', async ({ page, patientPage, docCenter }) => {
+test('Verify Print Facesheet functionality', async ({ page, patientPage, docCenter, seedPatient }) => {
     // Flow within the Patient List
     await patientPage.goto();
 
-    await patientPage.searchForPatient("cassius");
+    await patientPage.searchForPatient(seedPatient.firstName);
 
-    const patientRecord = page.getByText('Thunderfolk, Cassius (173)').first();
+    const patientRecord = page
+        .getByText(`${seedPatient.lastName}, ${seedPatient.firstName} (${seedPatient.chartNumber})`)
+        .first();
     await expect(patientRecord).toBeVisible();
 
     await patientPage.printfacesheetBtn.first().click();

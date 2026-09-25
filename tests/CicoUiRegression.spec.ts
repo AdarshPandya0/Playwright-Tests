@@ -1,12 +1,12 @@
 import { test } from '../utils/fixtures';
 
-test.describe.skip('CICO (Check-In/Check-Out) UI Regression', () => {
+test.describe('CICO (Check-In/Check-Out) UI Regression', () => {
     // ==========================================
     // SHARED TEST STATE (Accessible by all hooks)
     // ==========================================
-    const targetPatientId = 10005982198;
-    const patientName = 'Johnson, Kendl';
-    const patientFirstName = 'Kendl';
+    // Filled from this worker's seed patient (see the seedPatient fixture)
+    let patientName: string;
+    let patientFirstName: string;
 
     let createdApptId: number | undefined;
     let createdLastModifiedDate: number | undefined;
@@ -14,11 +14,13 @@ test.describe.skip('CICO (Check-In/Check-Out) UI Regression', () => {
     // ==========================================
     // SETUP: Runs before the test starts
     // ==========================================
-    test.beforeEach(async ({ cicoPage, scheduleApi }) => {
+    test.beforeEach(async ({ cicoPage, scheduleApi, seedPatient }) => {
+        patientName = `${seedPatient.lastName}, ${seedPatient.firstName}`;
+        patientFirstName = seedPatient.firstName;
         console.log(`[Setup] Seeding appointment for ${patientName}...`);
 
         // 1. Create the appointment and capture the response
-        const apiResponse = await scheduleApi.createAppointmentForToday(targetPatientId);
+        const apiResponse = await scheduleApi.createAppointmentForToday(seedPatient.id);
 
         // 2. Extract the ID and Date from the JSON response so we can delete it later.
         // `result` can come back as either an object or a bare number - handle both shapes.
@@ -68,8 +70,8 @@ test.describe.skip('CICO (Check-In/Check-Out) UI Regression', () => {
         // (Grid View validations)
         await cicoPage.clickGridView();
 
+        // The left-side list only shows pre-check-in appointments, so validate the central grid only
         await cicoPage.searchGridView(patientFirstName);
-        await cicoPage.verifyPatientInGridLeftSide(patientName);
 
         // Dynamically get the current status badge letter from the grid and verify it
         const currentStatus = await cicoPage.getPostCheckInStatusBadgeFromGrid(patientName);

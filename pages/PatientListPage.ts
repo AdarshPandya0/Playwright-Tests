@@ -14,7 +14,8 @@ export class PatientListPage {
     constructor(page: Page) {
         this.page = page;
 
-        this.filterToggleBtn = page.locator('#ui-panel-0-label');
+        // Scoped by panel title rather than PrimeNG's generated "#ui-panel-0-label" id
+        this.filterToggleBtn = page.locator('p-panel').filter({ hasText: 'Filters' }).locator('.ui-panel-titlebar-toggler');
         this.firstNameInput = page.locator('mtab-form-input').filter({ hasText: 'First Name' }).getByRole('textbox');
 
         this.filterSubmitBtn = page.getByRole('button', { name: 'Filter', exact: true });

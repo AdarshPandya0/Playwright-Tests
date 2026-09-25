@@ -52,10 +52,23 @@ export class CicoPage extends BasePage {
     // ==========================================
     // HELPER METHODS
     // ==========================================
-    /** Removes the duplicated filter-clear/wait logic from goto() and the view-switch clicks. */
-    private async clearFiltersAndWait(): Promise<void> {
-        if (await this.filterClearBtn.isVisible()) {
-            await this.filterClearBtn.click();
+    /**
+     * Removes the duplicated filter-clear/wait logic from goto() and the view-switch clicks.
+     * @param savedFilterWaitMs - On page load the user's saved facility chip can render a moment after
+     *   the network settles (seen on prod), so goto() waits briefly for it before deciding there is none.
+     */
+    private async clearFiltersAndWait(savedFilterWaitMs = 0): Promise<void> {
+        if (savedFilterWaitMs > 0) {
+            try {
+                await this.filterClearBtn.first().waitFor({ state: 'visible', timeout: savedFilterWaitMs });
+            } catch {
+                // No saved facility filter for this user
+            }
+        }
+
+        // An account can have more than one saved facility; clear them all (bounded, in case one won't go)
+        for (let attempt = 0; attempt < 5 && await this.filterClearBtn.first().isVisible(); attempt++) {
+            await this.filterClearBtn.first().click();
             await this.page.waitForTimeout(2000);
             if (await this.facilityDropdownFooterAddBtn.isVisible()) {
                 await this.page.keyboard.press('Escape');
@@ -70,7 +83,24 @@ export class CicoPage extends BasePage {
     async goto(): Promise<void> {
         await this.page.goto('/#/app/check-in');
         await this.page.waitForLoadState('networkidle');
-        await this.clearFiltersAndWait();
+        await this.clearFiltersAndWait(5000);
+    }
+
+    /**
+     * Facility names in this user's saved CICO facility filter (empty if none). Read before goto()
+     * clears them: on prod the FE keeps filtering by these even after the chips are removed (it doesn't
+     * send the updated facility list; fixed on local), so seeded appointments must be booked there.
+     */
+    async savedFacilityFilters(): Promise<string[]> {
+        await this.page.goto('/#/app/check-in');
+        await this.page.waitForLoadState('networkidle');
+        try {
+            await this.filterClearBtn.first().waitFor({ state: 'visible', timeout: 5000 });
+        } catch {
+            return [];
+        }
+        const chips = await this.page.locator('.ui-autocomplete-token').allInnerTexts();
+        return chips.map((chip) => chip.trim()).filter(Boolean);
     }
 
     async clickGridView(): Promise<void> {

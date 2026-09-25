@@ -16,9 +16,10 @@ export interface ScheduleApiResponse {
 
 export class ScheduleAptPOSTAPI extends ApiClient {
 
-    async createAppointmentForToday(patientId: number): Promise<ScheduleApiResponse> {
+    /** @param facilityName - defaults to the facility in data/env/<ENV>.json */
+    async createAppointmentForToday(patientId: number, facilityName?: string): Promise<ScheduleApiResponse> {
         // 1. Resolve this clinic's facility/provider/visit type/status IDs (cached per worker)
-        const ctx = await new LookupAPI(this.request, this.token).schedulingContext();
+        const ctx = await new LookupAPI(this.request, this.token).schedulingContext(facilityName);
 
         // 2. Generate an epoch timestamp for 1 hour from now to ensure it shows up in "Appts"
         const oneHourFromNow = new Date();

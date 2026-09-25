@@ -128,18 +128,48 @@ export class LookupAPI extends ApiClient {
         return pick(visitTypes, (v) => v.name === name, `Visit type "${name}"`).id;
     }
 
-    /** Resolves the full appointment context from data/env/<ENV>.json. */
-    schedulingContext(): Promise<SchedulingContext> {
-        return memo('schedulingContext', async () => {
-            const facility = await this.facility(envData.facility);
-            const providerId = await this.providerId(facility.id, envData.provider.firstName, envData.provider.lastName);
-            const specialtyId = await this.primarySpecialtyId(providerId);
+    /**
+     * A provider who can take the configured visit type at this facility: the provider from
+     * data/env/<ENV>.json when they're schedulable there, otherwise the first one who is.
+     */
+    private async bookableProvider(facilityId: number): Promise<{ providerId: number; specialtyId: number; visitTypeId: number }> {
+        const candidates: number[] = [];
+        try {
+            candidates.push(await this.providerId(facilityId, envData.provider.firstName, envData.provider.lastName));
+        } catch {
+            // Configured provider isn't schedulable at this facility
+        }
+        const schedulable = await memo(`providers:${facilityId}`, () =>
+            this.result<EmployeeRecord[]>('GET',
+                `/api/employee?model=id&facilityId=${facilityId}&isSchedulable=true&isInActive=true&search=&page=1&size=10`, SCHEDULER));
+        candidates.push(...schedulable.map((e) => e.id).filter((id) => !candidates.includes(id)));
+
+        for (const providerId of candidates) {
+            try {
+                const specialtyId = await this.primarySpecialtyId(providerId);
+                const visitTypeId = await this.visitTypeId(facilityId, specialtyId, envData.visitType);
+                return { providerId, specialtyId, visitTypeId };
+            } catch {
+                // No specialty, or the visit type isn't offered for it - try the next provider
+            }
+        }
+        throw new Error(`Lookup failed: no provider at facility ${facilityId} can take visit type "${envData.visitType}".`);
+    }
+
+    /**
+     * Resolves the full appointment context. The facility defaults to data/env/<ENV>.json but can be
+     * overridden, e.g. to book where a screen's saved facility filter is looking.
+     */
+    schedulingContext(facilityName: string = envData.facility): Promise<SchedulingContext> {
+        return memo(`schedulingContext:${facilityName}`, async () => {
+            const facility = await this.facility(facilityName);
+            const { providerId, specialtyId, visitTypeId } = await this.bookableProvider(facility.id);
 
             return {
                 facilityId: facility.id,
                 providerId,
                 specialtyId,
-                visitTypeId: await this.visitTypeId(facility.id, specialtyId, envData.visitType),
+                visitTypeId,
                 statusId: await this.staticMisc('ScheduleStatus', 'Unconfirmed'),
                 appointmentTypeId: await this.staticMisc('AppointmentType', 'Appointment'),
                 serviceLocationTypeId: await this.staticMisc('ServiceLocationType', 'Facility'),

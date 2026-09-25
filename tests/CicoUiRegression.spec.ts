@@ -19,8 +19,10 @@ test.describe('CICO (Check-In/Check-Out) UI Regression', () => {
         patientFirstName = seedPatient.firstName;
         console.log(`[Setup] Seeding appointment for ${patientName}...`);
 
-        // 1. Create the appointment and capture the response
-        const apiResponse = await scheduleApi.createAppointmentForToday(seedPatient.id);
+        // 1. Create the appointment where this user's CICO screen is looking (its saved facility filter,
+        //    else the env's default facility) and capture the response
+        const [savedFacility] = await cicoPage.savedFacilityFilters();
+        const apiResponse = await scheduleApi.createAppointmentForToday(seedPatient.id, savedFacility);
 
         // 2. Extract the ID and Date from the JSON response so we can delete it later.
         // `result` can come back as either an object or a bare number - handle both shapes.

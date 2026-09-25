@@ -8,6 +8,7 @@ import { ScheduleAptPOSTAPI } from "./api/ScheduleAptPOSTAPI";
 import { LookupAPI } from "./api/LookupAPI";
 import { PatientAPI, PatientRecord } from "./api/PatientAPI";
 import { configuredAccountCount } from "./testData";
+import { registerPromptHandlers } from "./promptHandlers";
 import fs from 'fs';
 import path from "path";
 
@@ -41,21 +42,9 @@ async function liveToken(page: Page): Promise<string> {
     return xTokenCookie.value;
 }
 
-/**
- * After a new build, each account sees a one-time "Release Note - vX.Y.Z" dialog whose mask
- * blocks every click. Acknowledge it so tests don't depend on whether this account has seen it.
- */
-async function dismissReleaseNoteIfShown(page: Page, waitMs: number): Promise<void> {
-    const releaseNote = page.getByRole('dialog').filter({ hasText: /Release Note - v/ });
-    try {
-        await releaseNote.waitFor({ state: 'visible', timeout: waitMs });
-    } catch {
-        return; // Not shown for this account
-    }
-    console.log('Dismissing release note dialog...');
-    await releaseNote.getByRole('button', { name: 'OK' }).click();
-    await expect(releaseNote).toBeHidden();
-}
+// How long to wait for the Dashboard after restoring a cached session / after a full login
+const FAST_PATH_TIMEOUT_MS = 15000;
+const SLOW_PATH_TIMEOUT_MS = 45000;
 
 // 2. THE EXTENSION: We pass our menu into base.extend<>
 export const test = base.extend<EHRFixtures>({
@@ -99,7 +88,8 @@ export const test = base.extend<EHRFixtures>({
             });
 
             const page = await context.newPage();
-            await page.goto('/#/app/dashboard'); 
+            await registerPromptHandlers(page);
+            await page.goto('/#/app/dashboard');
 
             const sessionData = fs.readFileSync(sessionPath, 'utf-8');
 
@@ -114,8 +104,7 @@ export const test = base.extend<EHRFixtures>({
 
             try {
                 // Wait for the Dashboard. If it redirects to login, this will fail!
-                await expect(page.getByRole('link', { name: "Dashboard" })).toBeVisible({ timeout: 5000 });
-                await dismissReleaseNoteIfShown(page, 500);
+                await expect(page.getByRole('link', { name: "Dashboard" })).toBeVisible({ timeout: FAST_PATH_TIMEOUT_MS });
 
                 // IF WE GET HERE, FAST PATH WAS A SUCCESS!
                 await use(page);
@@ -141,6 +130,9 @@ export const test = base.extend<EHRFixtures>({
         // STEP 3: SLOW PATH (Runs if no files exist, or if Fast Path failed!)
         // ==========================================================
         console.log('Executing Slow Path Login...');
+        // A full login can take ~20s on prod (the app loads its lookup data before routing to the
+        // dashboard), so don't let it eat into the test's own time budget.
+        testInfo.setTimeout(testInfo.timeout + SLOW_PATH_TIMEOUT_MS);
         context = await browser.newContext();
 
         await context.route('**/*logout*', route => {
@@ -148,6 +140,7 @@ export const test = base.extend<EHRFixtures>({
         });
 
         const setupPage = await context.newPage();
+        await registerPromptHandlers(setupPage);
 
         await setupPage.goto('/#/login');
         await setupPage.locator('#clinic input').fill(clinic);
@@ -155,8 +148,7 @@ export const test = base.extend<EHRFixtures>({
         await setupPage.locator('#password input').fill(dynamicPassword);
         await setupPage.getByRole('button', { name: 'Login' }).click();
 
-        await expect(setupPage.getByRole('link', { name: "Dashboard" })).toBeVisible();
-        await dismissReleaseNoteIfShown(setupPage, 3000);
+        await expect(setupPage.getByRole('link', { name: "Dashboard" })).toBeVisible({ timeout: SLOW_PATH_TIMEOUT_MS });
 
         // Snapshot Cookies and Local Storage
         await context.storageState({ path: statePath });

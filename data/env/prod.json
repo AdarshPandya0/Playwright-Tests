@@ -1,5 +1,5 @@
 {
-  "facility": "TODO: capture from prod",
-  "provider": { "firstName": "TODO", "lastName": "TODO" },
-  "visitType": "TODO"
+  "facility": "Carle Clinic",
+  "provider": { "firstName": "Harsh", "lastName": "Aryan" },
+  "visitType": "ESTABLISHED VISIT"
 }

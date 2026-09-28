@@ -1,12 +1,12 @@
 name: Playwright Production Tests
 
-# 1. Trigger the tests when code is pushed to main/ChrmTests, or a PR is opened against them.
+# 1. Trigger the tests when code is pushed to main/develop, or a PR is opened against them.
 #    Can also be started by hand; "update_snapshots" regenerates the Linux screenshot baselines.
 on:
   push:
-    branches: [ main, ChrmTests ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, ChrmTests ]
+    branches: [ main, develop ]
   workflow_dispatch:
     inputs:
       update_snapshots:

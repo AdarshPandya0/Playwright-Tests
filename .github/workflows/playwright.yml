@@ -41,10 +41,10 @@ jobs:
       EHR_PASSWORD_4: ${{ secrets.EHR_PASSWORD_4 }}
 
     steps:
+    # Uses the built-in GITHUB_TOKEN (contents: read above). A personal access token isn't needed
+    # to check out this repository, and an expired one breaks checkout ("could not read Username").
     - name: Checkout Repository
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v4

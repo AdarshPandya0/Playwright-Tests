@@ -90,9 +90,17 @@ jobs:
         if-no-files-found: error
 
     # 3. MERGE THE SHARD REPORTS AND UPLOAD THE HTML REPORT
+    # Shards only write blob reports; they're combined into playwright-report/ here. If the tests never
+    # ran (e.g. a setup step failed) there is nothing to merge, and merge-reports would fail with
+    # "Directory does not exist: blob-report", hiding the real failure.
     - name: Merge shard reports
       if: ${{ !cancelled() && !inputs.update_snapshots }}
-      run: npm run report:merge
+      run: |
+        if [ -d blob-report ] && [ -n "$(find blob-report -name '*.zip' -print -quit)" ]; then
+          npm run report:merge
+        else
+          echo "::warning::No shard blob reports found (the tests didn't run), skipping the HTML report"
+        fi
 
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4
@@ -100,6 +108,7 @@ jobs:
       with:
         name: playwright-report
         path: playwright-report/
+        if-no-files-found: warn
         retention-days: 30
 
     # 4. Google Chat Alert Hook (a notification problem shouldn't fail the test run)

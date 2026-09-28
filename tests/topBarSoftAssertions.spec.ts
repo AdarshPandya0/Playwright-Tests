@@ -1,8 +1,7 @@
-import { test , expect } from "../utils/fixtures.js";
+import { test, expect } from "../utils/fixtures";
 
-test('Verify Top Bar Elements with Soft Assertions @topbar @smoke @targeted ', async({ page, topBar }) => {
-
-    await topBar.goto();  
+test('Verify Top Bar Elements with Soft Assertions @topbar @smoke @targeted', async ({ page, topBar }) => {
+    await topBar.goto();
 
     await expect.soft(topBar.iptBtn).toBeVisible();
 
@@ -11,4 +10,4 @@ test('Verify Top Bar Elements with Soft Assertions @topbar @smoke @targeted ', a
     await expect.soft(topBar.statementsBtn).toBeVisible();
 
     await page.waitForTimeout(2000);
-});     
+});

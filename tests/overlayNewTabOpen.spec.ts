@@ -1,7 +1,6 @@
-import { test, expect } from "../utils/fixtures.js";
+import { test, expect } from "../utils/fixtures";
 
-test('Verify New Tab Open while on an Overlay @smoke ', async( { page, patientPage, topBar } ) => {
-
+test('Verify New Tab Open while on an Overlay @smoke', async ({ page, patientPage, topBar }) => {
     await patientPage.goto();
 
     await patientPage.openFindaSlotFirstRecord();
@@ -10,7 +9,7 @@ test('Verify New Tab Open while on an Overlay @smoke ', async( { page, patientPa
 
     const newTabPromise = page.context().waitForEvent('page');
 
-    await expect( async () => {
+    await expect(async () => {
         await topBar.searchBar.click();
 
         await expect(topBar.searchBarAddBtn).toBeVisible({
@@ -27,5 +26,4 @@ test('Verify New Tab Open while on an Overlay @smoke ', async( { page, patientPa
     await expect(newTab).toHaveURL('/#/app/patient/create');
 
     await newTab.close();
-
 });

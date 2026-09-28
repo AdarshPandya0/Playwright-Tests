@@ -1,9 +1,9 @@
-// utils/cleanup.js
 import fs from 'fs';
 import path from 'path';
 
-// List all the folders that needs to be wiped before starting the tests. This includes Playwright's own report folder and any custom folders you use for auth/session storage.
-const dirsToClean = ['.auth', 'blob-report', 'playwright-report'];
+// Folders to wipe before starting a test run. This includes Playwright's own
+// report folders and the custom folders used for cached auth/session storage.
+const dirsToClean: string[] = ['.auth', 'blob-report', 'playwright-report'];
 
 for (const dir of dirsToClean) {
     const dirPath = path.resolve(dir);

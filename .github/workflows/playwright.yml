@@ -1,28 +1,50 @@
 name: Playwright Production Tests
 
-# 1. Trigger the tests when code is pushed to main, or a PR is opened against main
+# 1. Trigger the tests when code is pushed to main/ChrmTests, or a PR is opened against them.
+#    Can also be started by hand; "update_snapshots" regenerates the Linux screenshot baselines.
 on:
   push:
     branches: [ main, ChrmTests ]
   pull_request:
     branches: [ main, ChrmTests ]
-  
+  workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: 'Regenerate Linux screenshot baselines (downloadable as the "linux-snapshots" artifact) instead of running the suite'
+        type: boolean
+        default: false
+
 #  schedule:
 #    - cron: '30 18 * * 1-5' # Every weekday at 18:30 UTC (12: 00 AM IST)
 
 permissions:
-  contents: read 
+  contents: read
 
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
+    # This maps the secure GitHub secrets to the OS environment variables!
+    # Each shard logs in with its own account: shard N uses EHR_USERNAME_N / EHR_PASSWORD_N.
+    env:
+      ENV: prod
+      URL: ${{ secrets.URL }}
+      EHR_CLINIC: ${{ secrets.EHR_CLINIC }}
+      EHR_USERNAME_1: ${{ secrets.EHR_USERNAME_1 }}
+      EHR_PASSWORD_1: ${{ secrets.EHR_PASSWORD_1 }}
+      EHR_USERNAME_2: ${{ secrets.EHR_USERNAME_2 }}
+      EHR_PASSWORD_2: ${{ secrets.EHR_PASSWORD_2 }}
+      EHR_USERNAME_3: ${{ secrets.EHR_USERNAME_3 }}
+      EHR_PASSWORD_3: ${{ secrets.EHR_PASSWORD_3 }}
+      EHR_USERNAME_4: ${{ secrets.EHR_USERNAME_4 }}
+      EHR_PASSWORD_4: ${{ secrets.EHR_PASSWORD_4 }}
+
     steps:
+    # Uses the built-in GITHUB_TOKEN (contents: read above). A personal access token isn't needed
+    # to check out this repository, and an expired one breaks checkout ("could not read Username").
     - name: Checkout Repository
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -33,31 +55,66 @@ jobs:
       run: npm ci
 
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      run: npx playwright install --with-deps chromium
 
-    # 2. RUN TESTS WITH SECRETS INJECTED
+    # Fail fast with a clear message instead of every test timing out on the login page
+    - name: Check required secrets
+      run: |
+        missing=""
+        for name in URL EHR_CLINIC EHR_USERNAME_1 EHR_PASSWORD_1 EHR_USERNAME_2 EHR_PASSWORD_2 EHR_USERNAME_3 EHR_PASSWORD_3 EHR_USERNAME_4 EHR_PASSWORD_4; do
+          [ -z "${!name}" ] && missing="$missing $name"
+        done
+        if [ -n "$missing" ]; then
+          echo "::error::Missing repository secrets:$missing"
+          exit 1
+        fi
+
+    # 2a. RUN THE SUITE (4 shards in parallel, one account each)
     - name: Run Playwright Tests
+      if: ${{ !inputs.update_snapshots }}
       run: npm run test:prod:sharded
-      env:
-        # This maps the secure GitHub secrets to the OS environment variables!
-        ENV: prod
-        URL: ${{ secrets.URL }}
-        EHR_USERNAME: ${{ secrets.EHR_USERNAME }}
-        EHR_PASSWORD: ${{ secrets.EHR_PASSWORD }}
-        EHR_CLINIC: ${{ secrets.EHR_CLINIC }}
 
-    # 3. UPLOAD THE HTML REPORT
+    # 2b. OR REGENERATE THE LINUX SCREENSHOT BASELINES
+    - name: Update Linux screenshot baselines
+      if: ${{ inputs.update_snapshots }}
+      run: npx playwright test tests/eventTypeSnapshotRegression.spec.ts --project=chromium --update-snapshots=all
+      env:
+        UPDATE_SNAPSHOTS: '1'
+
+    - name: Upload Linux screenshot baselines
+      if: ${{ inputs.update_snapshots }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-snapshots
+        path: tests/**/*-snapshots/*-linux.png
+        if-no-files-found: error
+
+    # 3. MERGE THE SHARD REPORTS AND UPLOAD THE HTML REPORT
+    # Shards only write blob reports; they're combined into playwright-report/ here. If the tests never
+    # ran (e.g. a setup step failed) there is nothing to merge, and merge-reports would fail with
+    # "Directory does not exist: blob-report", hiding the real failure.
+    - name: Merge shard reports
+      if: ${{ !cancelled() && !inputs.update_snapshots }}
+      run: |
+        if [ -d blob-report ] && [ -n "$(find blob-report -name '*.zip' -print -quit)" ]; then
+          npm run report:merge
+        else
+          echo "::warning::No shard blob reports found (the tests didn't run), skipping the HTML report"
+        fi
+
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }} # Ensures the report uploads even if a test fails!
+      if: ${{ !cancelled() && !inputs.update_snapshots }} # Ensures the report uploads even if a test fails!
       with:
         name: playwright-report
         path: playwright-report/
+        if-no-files-found: warn
         retention-days: 30
 
-    # 4. Google Chat Alert Hook
+    # 4. Google Chat Alert Hook (a notification problem shouldn't fail the test run)
     - name: Send Google Chat Notification
       if: always()
+      continue-on-error: true
       run: |
         curl -X POST -H "Content-Type: application/json" \
           -d '{

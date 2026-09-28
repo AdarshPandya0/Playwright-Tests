@@ -14,23 +14,43 @@ export interface ScheduleApiResponse {
     }
 }
 
+export interface AppointmentOptions {
+    /** Defaults to the facility in data/env/<ENV>.json */
+    facilityName?: string;
+    /** Start time, epoch ms. Defaults to one hour from now. */
+    fromTime?: number;
+    /** Minutes. Defaults to 45. */
+    duration?: number;
+}
+
+/** The fields tests read back from GET /api/Schedule/{id} */
+export interface AppointmentRecord {
+    id: number;
+    fromTime: number;
+    duration: number;
+    lastModifiedDate: number;
+}
+
 export class ScheduleAptPOSTAPI extends ApiClient {
 
     /** @param facilityName - defaults to the facility in data/env/<ENV>.json */
     async createAppointmentForToday(patientId: number, facilityName?: string): Promise<ScheduleApiResponse> {
-        // 1. Resolve this clinic's facility/provider/visit type/status IDs (cached per worker)
-        const ctx = await new LookupAPI(this.request, this.token).schedulingContext(facilityName);
+        // Starts one hour from now to ensure it shows up in "Appts"
+        return this.createAppointment(patientId, { facilityName });
+    }
 
-        // 2. Generate an epoch timestamp for 1 hour from now to ensure it shows up in "Appts"
-        const oneHourFromNow = new Date();
-        oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
-        const fromTimeMs = oneHourFromNow.getTime();
+    async createAppointment(patientId: number, options: AppointmentOptions = {}): Promise<ScheduleApiResponse> {
+        // 1. Resolve this clinic's facility/provider/visit type/status IDs (cached per worker)
+        const ctx = await new LookupAPI(this.request, this.token).schedulingContext(options.facilityName);
+
+        // 2. Default start: an epoch timestamp for 1 hour from now
+        const fromTimeMs = options.fromTime ?? Date.now() + 60 * 60 * 1000;
 
         // 3. Payload
         const payload = {
                 "id": null,
                 "fromTime": fromTimeMs,
-                "duration": 45,
+                "duration": options.duration ?? 45,
                 "caseDetailId": null,
                 "patientName": null,
                 "contactNumber": null,
@@ -118,6 +138,10 @@ export class ScheduleAptPOSTAPI extends ApiClient {
 
         // 4. Fire the request
         return await this.send('POST', '/api/Schedule', SCHEDULER, payload) as ScheduleApiResponse;
+    }
+
+    async getAppointment(apptId: number): Promise<AppointmentRecord> {
+        return await this.result<AppointmentRecord>('GET', `/api/Schedule/${apptId}`, SCHEDULER);
     }
 
     async deleteAppointment(apptId: number, lastModifiedDate?: number): Promise<ScheduleApiResponse> {

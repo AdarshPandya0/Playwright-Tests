@@ -29,10 +29,19 @@ interface EmployeeDetail {
     };
 }
 
+interface FacilityDetail {
+    timeZone?: { code?: string } | null;
+}
+
 /** Every ID the appointment payload needs, resolved for the current clinic. */
 export interface SchedulingContext {
     facilityId: number;
+    facilityName: string;
+    /** IANA zone the facility's schedule is shown in, e.g. "Asia/Kolkata" */
+    facilityTimeZone: string;
     providerId: number;
+    /** As the scheduler labels providers, e.g. "Adre, Rush" */
+    providerName: string;
     specialtyId: number;
     visitTypeId: number;
     statusId: number;
@@ -100,13 +109,22 @@ export class LookupAPI extends ApiClient {
         return pick(facilities, (f) => f.name === name, `Facility "${name}"`);
     }
 
-    async providerId(facilityId: number, firstName: string, lastName: string): Promise<number> {
+    async provider(facilityId: number, firstName: string, lastName: string): Promise<EmployeeRecord> {
         const employees = await memo(`provider:${facilityId}:${lastName}`, () =>
             this.result<EmployeeRecord[]>('GET',
                 `/api/employee?model=id&facilityId=${facilityId}&isSchedulable=true&isInActive=true` +
                 `&search=${encodeURIComponent(lastName)}&page=1&size=10`, SCHEDULER));
         return pick(employees, (e) => e.firstName === firstName && e.lastName === lastName,
-            `Provider "${lastName}, ${firstName}"`).id;
+            `Provider "${lastName}, ${firstName}"`);
+    }
+
+    /** IANA time zone of a facility (the scheduler shows its appointments in this zone). */
+    async facilityTimeZone(facilityId: number): Promise<string> {
+        const facility = await memo(`facilityDetail:${facilityId}`, () =>
+            this.result<FacilityDetail>('GET', `/api/facility/${facilityId}`, SCHEDULER));
+        const zone = facility.timeZone?.code;
+        if (!zone) throw new Error(`Lookup failed: facility ${facilityId} has no time zone.`);
+        return zone;
     }
 
     async primarySpecialtyId(employeeId: number): Promise<number> {
@@ -132,23 +150,23 @@ export class LookupAPI extends ApiClient {
      * A provider who can take the configured visit type at this facility: the provider from
      * data/env/<ENV>.json when they're schedulable there, otherwise the first one who is.
      */
-    private async bookableProvider(facilityId: number): Promise<{ providerId: number; specialtyId: number; visitTypeId: number }> {
-        const candidates: number[] = [];
+    private async bookableProvider(facilityId: number): Promise<{ provider: EmployeeRecord; specialtyId: number; visitTypeId: number }> {
+        const candidates: EmployeeRecord[] = [];
         try {
-            candidates.push(await this.providerId(facilityId, envData.provider.firstName, envData.provider.lastName));
+            candidates.push(await this.provider(facilityId, envData.provider.firstName, envData.provider.lastName));
         } catch {
             // Configured provider isn't schedulable at this facility
         }
         const schedulable = await memo(`providers:${facilityId}`, () =>
             this.result<EmployeeRecord[]>('GET',
                 `/api/employee?model=id&facilityId=${facilityId}&isSchedulable=true&isInActive=true&search=&page=1&size=10`, SCHEDULER));
-        candidates.push(...schedulable.map((e) => e.id).filter((id) => !candidates.includes(id)));
+        candidates.push(...schedulable.filter((e) => !candidates.some((c) => c.id === e.id)));
 
-        for (const providerId of candidates) {
+        for (const provider of candidates) {
             try {
-                const specialtyId = await this.primarySpecialtyId(providerId);
+                const specialtyId = await this.primarySpecialtyId(provider.id);
                 const visitTypeId = await this.visitTypeId(facilityId, specialtyId, envData.visitType);
-                return { providerId, specialtyId, visitTypeId };
+                return { provider, specialtyId, visitTypeId };
             } catch {
                 // No specialty, or the visit type isn't offered for it - try the next provider
             }
@@ -163,11 +181,14 @@ export class LookupAPI extends ApiClient {
     schedulingContext(facilityName: string = envData.facility): Promise<SchedulingContext> {
         return memo(`schedulingContext:${facilityName}`, async () => {
             const facility = await this.facility(facilityName);
-            const { providerId, specialtyId, visitTypeId } = await this.bookableProvider(facility.id);
+            const { provider, specialtyId, visitTypeId } = await this.bookableProvider(facility.id);
 
             return {
                 facilityId: facility.id,
-                providerId,
+                facilityName: facility.name,
+                facilityTimeZone: await this.facilityTimeZone(facility.id),
+                providerId: provider.id,
+                providerName: `${provider.lastName}, ${provider.firstName}`,
                 specialtyId,
                 visitTypeId,
                 statusId: await this.staticMisc('ScheduleStatus', 'Unconfirmed'),

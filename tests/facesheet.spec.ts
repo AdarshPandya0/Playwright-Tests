@@ -23,7 +23,14 @@ test('Verify Print Facesheet functionality', async ({ page, patientPage, docCent
     await patientPage.savefacesheetBtn.click();
     await page.waitForTimeout(2000); // Let the facesheet save complete before navigating away
 
-    await patientRecord.click();
+    // Saving the facesheet can refresh the grid back to the unfiltered list (seen on prod),
+    // so search again if our patient's row is gone before opening the chart
+    await expect(async () => {
+        if (!await patientRecord.isVisible()) {
+            await patientPage.searchForPatient(seedPatient.firstName);
+        }
+        await patientRecord.click({ timeout: 5000 });
+    }).toPass({ timeout: 30000 });
 
     // Flow from the Patient Chart to Document Center, verifying the facesheet document
     await docCenter.navigateToSidebar();
